@@ -1,0 +1,25 @@
+{
+  "name": "gamejam-boilerplate",
+  "version": "1.0.0",
+  "description": "Boilerplate for Game Jams like JS13KGames",
+  "main": "build.js",
+  "scripts": {
+    "start": "node build.js --watch",
+    "build": "node build.js"
+  },
+  "author": "Jerome Lecomte <jerome@herebefrogs.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "browser-sync": "^2.23.6",
+    "htmlmin": "0.0.7",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-uglify": "^3.0.0",
+    "yazl": "^2.4.3"
+  },
+  "dependencies": {
+    "npm": "^5.10.0"
+  }
+}
