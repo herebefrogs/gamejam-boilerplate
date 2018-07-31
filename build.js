@@ -16,7 +16,10 @@ const inputOptions = {
   input: 'src/js/game.js',
   plugins: [
     // embed images into source files as data URI
-    dataurl({ charset: 'src/img/charset.png' }),
+    dataurl({
+      charset: 'src/img/charset.png',
+      tileset: 'src/img/tileset.png',
+     }),
     // transpile ES6 to ES5 for maximum browser compatibility
     babel({
       presets: [
