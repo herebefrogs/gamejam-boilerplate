@@ -18,8 +18,8 @@ module.exports = function (options) {
       let code = source;
 
       assets.forEach(([ variable, data ]) => {
-         code = code.replace(new RegExp(`const ${variable} = '.*';`, 'gm'),
-                            `const ${variable} = '${data}';`);
+         code = code.replace(new RegExp(`let ${variable} = '.*';`, 'gm'),
+                            `let ${variable} = '${data}';`);
       })
 
       return { code, map: null };
