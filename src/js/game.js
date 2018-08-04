@@ -127,6 +127,7 @@ function render() {
     case GAME_SCREEN:
       renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
+      renderDebugTouch();
       entities.forEach(renderEntity);
       break;
     case END_SCREEN:
@@ -318,4 +319,129 @@ onkeyup = function(e) {
       }
       break;
   }
+};
+
+// MOBILE INPUT HANDLERS
+
+let minX = 0;
+let minY = 0;
+let maxX = 0;
+let maxY = 0;
+let MIN_DISTANCE = 20; // in px
+
+// adding onmousedown/move/up triggers a MouseEvent and a PointerEvent
+// on platform that support both (duplicate event, pointer > mouse || touch)
+_window.ontouchstart = _window.onpointerdown = function(e) {
+  e.preventDefault();
+  switch (screen) {
+    case GAME_SCREEN:
+      [maxX, maxY] = [minX, minY] = pointerLocation(e);
+      break;
+  }
+};
+
+_window.ontouchmove = _window.onpointermove = function(e) {
+  e.preventDefault();
+  switch (screen) {
+    case GAME_SCREEN:
+      if (minX && minY) {
+        setTouchPosition(pointerLocation(e));
+      }
+      break;
+  }
+}
+
+_window.ontouchend = _window.onpointerup = function(e) {
+  e.preventDefault();
+  switch (screen) {
+    case TITLE_SCREEN:
+      startGame();
+      break;
+    case GAME_SCREEN:
+      // stop hero
+      hero.moveX = hero.moveY = 0;
+      // end touch
+      minX = minY = maxX = maxY = 0;
+      break;
+    case END_SCREEN:
+      screen = TITLE_SCREEN;
+      break;
+  }
+};
+
+// utilities
+function pointerLocation(e) {
+  return [e.pageX || e.changedTouches[0].pageX, e.pageY || e.changedTouches[0].pageY];
+};
+
+function setTouchPosition([x, y]) {
+  // touch moving further right
+  if (x > maxX) {
+    maxX = x;
+    if (maxX - minX > MIN_DISTANCE) {
+      hero.moveX = 1;
+    }
+  }
+  // touch moving further left
+  else if (x < minX) {
+    minX = x;
+    if (maxX - minX > MIN_DISTANCE) {
+      hero.moveX = -1;
+    }
+  }
+  // touch reversing left while hero moving right
+  else if (x < maxX && hero.moveX > 0) {
+    minX = x;
+    hero.moveX = 0;
+  }
+  // touch reversing right while hero moving left
+  else if (minX < x && hero.moveX < 0) {
+    maxX = x;
+    hero.moveX = 0;
+  }
+
+  // touch moving further down
+  if (y > maxY) {
+    maxY = y;
+    if (maxY - minY > MIN_DISTANCE) {
+      hero.moveY = 1;
+    }
+  }
+  // touch moving further up
+  else if (y < minY) {
+    minY = y;
+    if (maxY - minY > MIN_DISTANCE) {
+      hero.moveY = -1;
+    }
+  }
+  // touch reversing up while hero moving down
+  else if (y < maxY && hero.moveY > 0) {
+    minY = y;
+    hero.moveY = 0;
+  }
+  // touch reversing down while hero moving up
+  else if (minY < y && hero.moveY < 0) {
+    maxY = y;
+    hero.moveY = 0;
+  }
+};
+
+function renderDebugTouch() {
+  const _maxX = maxX / innerWidth * WIDTH;
+  const _minX = minX / innerWidth * WIDTH;
+  const _maxY = maxY / innerHeight * HEIGHT;
+  const _minY = minY / innerHeight * HEIGHT;
+  renderDebugTouchBound(_maxX, _maxX, 0, HEIGHT, '#f00');
+  renderDebugTouchBound(_minX, _minX, 0, HEIGHT, '#ff0');
+  renderDebugTouchBound(0, WIDTH, _maxY, _maxY, '#f00');
+  renderDebugTouchBound(0, WIDTH, _minY, _minY, '#ff0');
+};
+
+function renderDebugTouchBound(_minX, _maxX, _minY, _maxY, color) {
+  BUFFER_CTX.strokeStyle = color;
+  BUFFER_CTX.beginPath();
+  BUFFER_CTX.moveTo(_minX, _minY);
+  BUFFER_CTX.lineTo(_maxX, _maxY);
+  BUFFER_CTX.stroke();
+  BUFFER_CTX.closePath();
 };
