@@ -127,7 +127,8 @@ function render() {
     case GAME_SCREEN:
       renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
-      renderDebugTouch();
+      // uncomment to debug mobile input handlers
+      // renderDebugTouch();
       entities.forEach(renderEntity);
       break;
     case END_SCREEN:
@@ -327,7 +328,8 @@ let minX = 0;
 let minY = 0;
 let maxX = 0;
 let maxY = 0;
-let MIN_DISTANCE = 20; // in px
+let MIN_DISTANCE = 30; // in px
+let touches = [];
 
 // adding onmousedown/move/up triggers a MouseEvent and a PointerEvent
 // on platform that support both (duplicate event, pointer > mouse || touch)
@@ -424,17 +426,44 @@ function setTouchPosition([x, y]) {
     maxY = y;
     hero.moveY = 0;
   }
+
+  // uncomment to debug mobile input handlers
+  // addDebugTouch(x, y);
+};
+
+function addDebugTouch(x, y) {
+  touches.push([x / innerWidth * WIDTH, y / innerHeight * HEIGHT]);
+  if (touches.length > 10) {
+    touches = touches.slice(touches.length - 10);
+  }
 };
 
 function renderDebugTouch() {
-  const _maxX = maxX / innerWidth * WIDTH;
-  const _minX = minX / innerWidth * WIDTH;
-  const _maxY = maxY / innerHeight * HEIGHT;
-  const _minY = minY / innerHeight * HEIGHT;
-  renderDebugTouchBound(_maxX, _maxX, 0, HEIGHT, '#f00');
-  renderDebugTouchBound(_minX, _minX, 0, HEIGHT, '#ff0');
-  renderDebugTouchBound(0, WIDTH, _maxY, _maxY, '#f00');
-  renderDebugTouchBound(0, WIDTH, _minY, _minY, '#ff0');
+  let x = maxX / innerWidth * WIDTH;
+  let y = maxY / innerHeight * HEIGHT;
+  renderDebugTouchBound(x, x, 0, HEIGHT, '#f00');
+  renderDebugTouchBound(0, WIDTH, y, y, '#f00');
+  x = minX / innerWidth * WIDTH;
+  y = minY / innerHeight * HEIGHT;
+  renderDebugTouchBound(x, x, 0, HEIGHT, '#ff0');
+  renderDebugTouchBound(0, WIDTH, y, y, '#ff0');
+
+  if (touches.length) {
+    BUFFER_CTX.strokeStyle = BUFFER_CTX.fillStyle =   '#02d';
+    BUFFER_CTX.beginPath();
+    [x, y] = touches[0];
+    BUFFER_CTX.moveTo(x, y);
+    touches.forEach(function([x, y]) {
+      BUFFER_CTX.lineTo(x, y);
+    });
+    BUFFER_CTX.stroke();
+    BUFFER_CTX.closePath();
+    BUFFER_CTX.beginPath();
+    [x, y] = touches[touches.length - 1];
+    BUFFER_CTX.arc(x, y, 2, 0, 2 * Math.PI)
+    BUFFER_CTX.fill();
+    BUFFER_CTX.closePath();
+  }
 };
 
 function renderDebugTouchBound(_minX, _maxX, _minY, _maxY, color) {
