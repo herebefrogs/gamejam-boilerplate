@@ -1,10 +1,9 @@
+const child_process = require('child_process');
 const fs = require('fs');
 const htmlmin = require('htmlmin');
-const yazl = require('yazl');
 const rollup = require('rollup');
-const babel = require('rollup-plugin-babel');
+const terser = require('terser');
 const dataurl = require('./rollup-plugin-dataurl');
-const uglify = require('rollup-plugin-uglify');
 const browserSync = require('browser-sync').create();
 
 
@@ -19,16 +18,8 @@ const inputOptions = {
     dataurl({
       charset: 'src/img/charset.png',
       tileset: 'src/img/tileset.png',
-     }),
-    // transpile ES6 to ES5 for maximum browser compatibility
-    babel({
-      presets: [
-        [ 'env', { modules: false } ]
-      ]
     }),
-    // strip indentation and shrink variable names (ES5 only)
-    uglify()
-  ]
+  ],
 };
 const outputOptions = {
   file: 'dist/game.js',
@@ -37,7 +28,7 @@ const outputOptions = {
   // allow the use of onresize=onrotate=... and other space saver hacks
   strict: false,
   // generate sourcemaps (development mode only)
-  sourcemap: devMode
+  sourcemap: devMode,
 };
 
 const compile = async () => {
@@ -61,10 +52,10 @@ const compile = async () => {
           break;
         // when all bundles are done
         case 'END':
-          package(devMode);
-          // NOTE: these 2 run in parallel
-          report();
-          livereload();
+          if (inlineMinified(devMode)) {
+            livereload();
+            zipReport();
+          }
           break;
       }
     });
@@ -72,41 +63,86 @@ const compile = async () => {
     const bundle = await rollup.rollup(inputOptions);
     await bundle.write(outputOptions);
 
-    package(devMode);
-    report();
+    if (inlineMinified(devMode)) {
+      zipReport();
+    }
   }
 }
 
-const package = (devMode) => {
-  // optimize HTML template
-  const html = htmlmin(
-    fs.readFileSync('src/index.html').toString()
-  );
+const inlineMinified = (devMode) => {
+  // retrieve previous variable names mapping
+  let nameCache;
+  try {
+    nameCache = JSON.parse(fs.readFileSync('dist/cache.json', 'utf8'));
+  } catch (err) {
+    nameCache = {};
+  }
 
-  // inline optimized JS bundle into HTML template
+  const options = {
+    compress: {
+      passes: 4,
+      unsafe: true,
+      unsafe_arrows: true,
+      unsafe_comps: true,
+      unsafe_math: true,
+    },
+    ecma: 8,
+    mangle: true,
+    // NOTE: for mangling object properties names to work,
+    // - must first add all DOM properties into reserved (e.g. imageSmoothingEnabled, hero, move)
+    // - then do another replacement in the code for all the dynamically accessed properties (e.g. action = 'move' -> action = nameCache.props.props.$move)
+    // so maybe do this only if space becomes a concern...
+    // mangle: {
+    //   properties: {
+    //     reserved: []
+    //   }
+    // },
+    module: true,
+    nameCache,
+    sourceMap: devMode ? {
+      content: fs.readFileSync('dist/game.js.map', 'utf8'),
+      url: 'minified.js.map'
+    } : false,
+  };
+
+  // optimize JS bundle
   const code = fs.readFileSync('dist/game.js').toString();
-  // prepend <body> so browsersync can insert its livereload script (development mode only)
-  const header = devMode ? '<body>' : '';
-  fs.writeFileSync('dist/index.html', `${header}${html}<script>${code}</script>`);
+  const result = terser.minify(code, options);
+
+  if (result.error) {
+    console.error('Minification failed: ', result.error);
+    return false;
+  }
+  // save the minified source map
+  if (result.map) {
+    fs.writeFileSync('dist/minified.js.map', result.map, 'utf8');
+  }
+  // save the variable names mapping
+  fs.writeFileSync('dist/cache.json', JSON.stringify(options.nameCache), 'utf8');
+
+  // optimize HTML template
+  const html = htmlmin(fs.readFileSync('src/index.html').toString());
+  // inline optimized JS bundle into HTML template
+  // NOTE:prepend <body> so browsersync can insert its livereload script (development mode only)
+  fs.writeFileSync('dist/index.html', `${devMode ? '<body>' : ''}${html}<script>${result.code}</script>`);
+
+  return true;
 };
 
-const report = () => {
+const zipReport = () => {
   // zip HTML-with-inlined-JS file for game jam submission
-  const zip = new yazl.ZipFile();
-  zip.addFile('dist/index.html', 'index.html');
-  zip.outputStream.pipe(fs.createWriteStream('dist/game.zip')).on('close', function() {
-    // report zip size and remaining bytes
-    console.log('dist/index.html -> dist/game.zip');
-    const size = fs.statSync('dist/game.zip').size;
-    const limit = 1024 * 13;
-    const remaining = limit - size;
-    const percentage = Math.round((remaining / limit) * 100 * 100) / 100;
-    console.log('\n-------------');
-    console.log(`USED: ${size} BYTES`);
-    console.log(`REMAINING: ${remaining} BYTES (${percentage}% of 13k budget)`);
-    console.log('-------------\n');
-  });
-  zip.end();
+  child_process.execSync('zip -jqX9 dist/game.zip dist/index.html');
+
+  // report zip size and remaining bytes
+  console.log('dist/index.html -> dist/game.zip');
+  const size = fs.statSync('dist/game.zip').size;
+  const limit = 1024 * 13;
+  const remaining = limit - size;
+  const percentage = Math.round((remaining / limit) * 100 * 100) / 100;
+  console.log('\n-------------');
+  console.log(`USED: ${size} BYTES`);
+  console.log(`REMAINING: ${remaining} BYTES (${percentage}% of 13k budget)`);
+  console.log('-------------\n');
 };
 
 let livereload = () => {

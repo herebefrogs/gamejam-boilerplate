@@ -161,8 +161,7 @@ function renderText(msg, x, y, align = ALIGN_LEFT, scale = 1) {
   const ALIGN_OFFSET = align === ALIGN_RIGHT ? MSG_WIDTH :
                        align === ALIGN_CENTER ? MSG_WIDTH / 2 :
                        0;
-  // TODO [...msg].forEach((c, i) => { ... }) with ES6/terser
-  msg.split('').forEach(function(c, i) {
+  [...msg].forEach((c, i) => {
     BUFFER_CTX.drawImage(
       charset,
       // TODO could memoize the characters index or hardcode a lookup table
@@ -197,19 +196,15 @@ function toggleLoop(value) {
 
 // EVENT HANDLERS
 
-onload = function(e) {
+onload = async (e) => {
   // the real "main" of the game
   _document.title = 'Game Jam Boilerplate';
 
   onresize();
 
-  // TODO use async/await
-  Promise.all([
-    loadImg(charset).then(function(img) { charset = img; }),
-    loadImg(tileset).then(function(img) { tileset = img; }),
-  ]).then(function() {
-    toggleLoop(true);
-  });
+  charset = await loadImg(charset);
+  tileset = await loadImg(tileset);
+  toggleLoop(true);
 };
 
 onresize = _window.onrotate = function() {
