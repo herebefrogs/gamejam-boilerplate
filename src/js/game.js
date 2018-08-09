@@ -38,7 +38,13 @@ const ATLAS = {
       { x: 64, y: 0, w: 16, h: 18 },
     ],
     speed: 100,
-  }
+  },
+  foe: {
+    'move': [
+      { x: 0, y: 0, w: 16, h: 18 },
+    ],
+    speed: 0,
+  },
 };
 const CHARSET_SIZE = 8; // in px
 const FRAME_DURATION = 0.1; // duration of 1 animation frame, in seconds
@@ -55,19 +61,120 @@ let running = true;
 
 // GAMEPLAY HANDLERS
 
-function createEntity(type) {
+function startGame() {
+  countdown = 60;
+  hero = createEntity('hero', WIDTH / 2, HEIGHT / 2);
+  entities = [
+    hero,
+    createEntity('foe', 100, 100),
+    createEntity('foe', 100, 118),
+    createEntity('foe', 116, 118),
+    createEntity('foe', 116, 100),
+  ];
+  screen = GAME_SCREEN;
+};
+
+function testAABBCollision(entity1, entity2) {
+  const test = {
+    entity1MaxX: entity1.x + entity1.w,
+    entity1MaxY: entity1.y + entity1.h,
+    entity2MaxX: entity2.x + entity2.w,
+    entity2MaxY: entity2.y + entity2.h,
+  };
+
+  test.collide = entity1.x < test.entity2MaxX
+    && test.entity1MaxX > entity2.x
+    && entity1.y < test.entity2MaxY
+    && test.entity1MaxY > entity2.y;
+
+  return test;
+};
+
+// entity1 collided into entity2
+function correctAABBCollision(entity1, entity2, test) {
+  const { entity1MaxX, entity1MaxY, entity2MaxX, entity2MaxY } = test;
+
+  const deltaMaxX = entity1MaxX - entity2.x;
+  const deltaMaxY = entity1MaxY - entity2.y;
+  const deltaMinX = entity2MaxX - entity1.x;
+  const deltaMinY = entity2MaxY - entity1.y;
+
+  // AABB collision response (homegrown wall sliding, not physically correct
+  // because just pushing along one axis by the distance overlapped)
+
+  // entity1 moving down/right
+  if (entity1.moveX > 0 && entity1.moveY > 0) {
+    if (deltaMaxX < deltaMaxY) {
+      // collided right side first
+      entity1.x -= deltaMaxX;
+    } else {
+      // collided top side first
+      entity1.y -= deltaMaxY;
+    }
+  }
+  // entity1 moving up/right
+  else if (entity1.moveX > 0 && entity1.moveY < 0) {
+    if (deltaMaxX < deltaMinY) {
+      // collided right side first
+      entity1.x -= deltaMaxX;
+    } else {
+      // collided bottom side first
+      entity1.y += deltaMinY;
+    }
+  }
+  // entity1 moving right
+  else if (entity1.moveX > 0) {
+    entity1.x -= deltaMaxX;
+  }
+  // entity1 moving down/left
+  else if (entity1.moveX < 0 && entity1.moveY > 0) {
+    if (deltaMinX < deltaMaxY) {
+      // collided left side first
+      entity1.x += deltaMinX;
+    } else {
+      // collided top side first
+      entity1.y -= deltaMaxY;
+    }
+  }
+  // entity1 moving up/left
+  else if (entity1.moveX < 0 && entity1.moveY < 0) {
+    if (deltaMinX < deltaMinY) {
+      // collided left side first
+      entity1.x += deltaMinX;
+    } else {
+      // collided bottom side first
+      entity1.y += deltaMinY;
+    }
+  }
+  // entity1 moving left
+  else if (entity1.moveX < 0) {
+    entity1.x += deltaMinX;
+  }
+  // entity1 moving down
+  else if (entity1.moveY > 0) {
+    entity1.y -= deltaMaxY;
+  }
+  // entity1 moving up
+  else if (entity1.moveY < 0) {
+    entity1.y += deltaMinY;
+  }
+};
+
+function createEntity(type, x = 0, y = 0) {
   const action = 'move';
   const sprite = ATLAS[type][action][0];
   return {
     action,
     frame: 0,
     frameTime: 0,
+    h: sprite.h,
     moveX: 0,
     moveY: 0,
     speed: ATLAS[type].speed,
     type,
-    x: (WIDTH - sprite.w) / 2,
-    y: (HEIGHT - sprite.h) / 2,
+    w: sprite.w,
+    x,
+    y,
   };
 };
 
@@ -85,13 +192,6 @@ function updateEntity(entity) {
   entity.y += distance * entity.moveY;
 };
 
-function startGame() {
-  countdown = 60;
-  hero = createEntity('hero');
-  entities = [hero];
-  screen = GAME_SCREEN;
-};
-
 function update() {
   switch (screen) {
     case GAME_SCREEN:
@@ -100,6 +200,12 @@ function update() {
         screen = END_SCREEN;
       }
       entities.forEach(updateEntity);
+      entities.slice(1).forEach((entity) => {
+        const test = testAABBCollision(hero, entity);
+        if (test.collide) {
+          correctAABBCollision(hero, entity, test);
+        }
+      });
       break;
   }
 };
