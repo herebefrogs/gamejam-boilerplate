@@ -1,0 +1,15 @@
+game engine
+===========
+- keep player within canvas
+- camera-window + edge-snapping + lerp-smoothing (new)
+- sound engine (Soundbox smaller player, Sonant-X, Famitracker, lsdj)
+- gamepad support
+- ? memoize the character's position to avoid calling ALPHABET.indexOf(c) over and over
+
+build chain
+===========
+- optimize images with TinyPNG (https://tinypng.com/developers/reference/nodejs) https://tinypng.com/ or ZPNG (windows) https://github.com/catid/Zpng before committing them
+- recompress the Zip with AdvZIP (windows)
+- ? replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
+- ? mangle properties, and use cache names to replace all values matching an object propery that are assigned to a variable (e.g. hero.move = [], action = 'move' becomes a.b = [], c = 'move'... 'move' needs to be converted to 'b')
+
