@@ -1,8 +1,8 @@
 game engine
 ===========
-- keep player within canvas
 - camera-window + edge-snapping + lerp-smoothing (new)
 - sound engine (Soundbox smaller player, Sonant-X, Famitracker, lsdj)
+- add Konami code
 - gamepad support
 - ? memoize the character's position to avoid calling ALPHABET.indexOf(c) over and over
 

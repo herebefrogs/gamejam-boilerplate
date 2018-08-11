@@ -19,8 +19,6 @@ let entities;
 const CTX = c.getContext('2d');         // visible canvas
 const WIDTH = 320;
 const HEIGHT = 240;
-const BG = c.cloneNode();               // full map rendered off screen
-const BG_CTX = BG.getContext('2d');
 const BUFFER = c.cloneNode();           // visible portion of map
 const BUFFER_CTX = BUFFER.getContext('2d');
 
@@ -160,6 +158,19 @@ function correctAABBCollision(entity1, entity2, test) {
   }
 };
 
+function constrainToViewport(entity) {
+  if (entity.x < 0) {
+    entity.x = 0;
+  } else if (entity.x > WIDTH - entity.w) {
+    entity.x = WIDTH - entity.w;
+  }
+  if (entity.y < 0) {
+    entity.y = 0;
+  } else if (entity.y > HEIGHT - entity.h) {
+    entity.y = HEIGHT - entity.h;
+  }
+};
+
 function createEntity(type, x = 0, y = 0) {
   const action = 'move';
   const sprite = ATLAS[type][action][0];
@@ -206,6 +217,7 @@ function update() {
           correctAABBCollision(hero, entity, test);
         }
       });
+      constrainToViewport(hero);
       break;
   }
 };
@@ -322,7 +334,7 @@ onresize = _window.onrotate = function() {
   c.width = WIDTH * scaleToFit;
   c.height = HEIGHT * scaleToFit;
   // disable smoothing on image scaling
-  [ CTX, BG_CTX, BUFFER_CTX ].forEach(function(ctx) {
+  [ CTX, BUFFER_CTX ].forEach(function(ctx) {
     // TODO is this still needed for Edge?
     ctx.msImageSmoothingEnabled = ctx.imageSmoothingEnabled = false;
   });
