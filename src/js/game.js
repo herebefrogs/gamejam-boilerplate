@@ -2,6 +2,8 @@ import { rand } from './utils';
 
 const _window = window;
 const _document = document;
+const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+let konamiIndex = 0;
 
 // GAMEPLAY VARIABLES
 
@@ -60,6 +62,7 @@ let running = true;
 // GAMEPLAY HANDLERS
 
 function startGame() {
+  konamiIndex = 0;
   countdown = 60;
   hero = createEntity('hero', WIDTH / 2, HEIGHT / 2);
   entities = [
@@ -241,6 +244,9 @@ function render() {
     case TITLE_SCREEN:
       renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
       renderText('press any key', WIDTH / 2, HEIGHT / 2, ALIGN_CENTER);
+      if (konamiIndex === konamiCode.length) {
+        renderText('konami mode on', WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+      }
       break;
     case GAME_SCREEN:
       renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
@@ -398,7 +404,11 @@ onkeydown = function(e) {
 onkeyup = function(e) {
   switch (screen) {
     case TITLE_SCREEN:
-      startGame();
+      if (e.which !== konamiCode[konamiIndex] || konamiIndex === konamiCode.length) {
+        startGame();
+      } else {
+        konamiIndex++;
+      }
       break;
     case GAME_SCREEN:
       switch (e.which) {
