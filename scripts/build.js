@@ -45,10 +45,10 @@ const compile = async () => {
     watcher.on('event', event => {
       switch (event.code) {
         case 'START':
-          console.log('Building...');
+          console.log('Building JS...');
           break;
         case 'BUNDLE_END':
-          console.log(`${event.input} -> ${event.output[0]} (${event.duration}ms)`);
+          console.log(`${event.input} (${event.duration}ms)`);
           break;
         // when all bundles are done
         case 'END':
@@ -60,6 +60,7 @@ const compile = async () => {
       }
     });
   } else {
+    console.log('Building JS...');
     const bundle = await rollup.rollup(inputOptions);
     await bundle.write(outputOptions);
 
@@ -88,6 +89,7 @@ const inlineMinified = (devMode) => {
   };
 
   // optimize JS bundle
+  console.log('Minifying JS...');
   const code = fs.readFileSync('dist/game.js').toString();
   const result = terser.minify(code, options);
 
@@ -101,8 +103,10 @@ const inlineMinified = (devMode) => {
   }
 
   // optimize HTML template
+  console.log('Optimizing HTML...');
   const html = htmlmin(fs.readFileSync('src/index.html').toString());
   // inline optimized JS bundle into HTML template
+  console.log('Inlining JS...');
   // NOTE:prepend <body> so browsersync can insert its livereload script (development mode only)
   fs.writeFileSync('dist/index.html', `${devMode ? '<body>' : ''}${html}<script>${result.code}</script>`);
 
@@ -111,10 +115,14 @@ const inlineMinified = (devMode) => {
 
 const zipReport = () => {
   // zip HTML-with-inlined-JS file for game jam submission
+  console.log('Zipping...');
   child_process.execSync('zip -jqX9 dist/game.zip dist/index.html');
+  console.log('Optimizing ZIP...')
+  // optimize zip (requires AdvanceCOMP tools --- on Mac, brew install advancecomp)
+  child_process.execSync('advzip -z -4 dist/game.zip');
+
 
   // report zip size and remaining bytes
-  console.log('dist/index.html -> dist/game.zip');
   const size = fs.statSync('dist/game.zip').size;
   const limit = 1024 * 13;
   const remaining = limit - size;
