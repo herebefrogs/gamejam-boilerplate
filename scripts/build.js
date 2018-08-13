@@ -70,14 +70,6 @@ const compile = async () => {
 }
 
 const inlineMinified = (devMode) => {
-  // retrieve previous variable names mapping
-  let nameCache;
-  try {
-    nameCache = JSON.parse(fs.readFileSync('dist/cache.json', 'utf8'));
-  } catch (err) {
-    nameCache = {};
-  }
-
   const options = {
     compress: {
       passes: 4,
@@ -88,17 +80,7 @@ const inlineMinified = (devMode) => {
     },
     ecma: 8,
     mangle: true,
-    // NOTE: for mangling object properties names to work,
-    // - must first add all DOM properties into reserved (e.g. imageSmoothingEnabled, hero, move)
-    // - then do another replacement in the code for all the dynamically accessed properties (e.g. action = 'move' -> action = nameCache.props.props.$move)
-    // so maybe do this only if space becomes a concern...
-    // mangle: {
-    //   properties: {
-    //     reserved: []
-    //   }
-    // },
     module: true,
-    nameCache,
     sourceMap: devMode ? {
       content: fs.readFileSync('dist/game.js.map', 'utf8'),
       url: 'minified.js.map'
@@ -117,8 +99,6 @@ const inlineMinified = (devMode) => {
   if (result.map) {
     fs.writeFileSync('dist/minified.js.map', result.map, 'utf8');
   }
-  // save the variable names mapping
-  fs.writeFileSync('dist/cache.json', JSON.stringify(options.nameCache), 'utf8');
 
   // optimize HTML template
   const html = htmlmin(fs.readFileSync('src/index.html').toString());
