@@ -2,10 +2,10 @@
   "name": "gamejam-boilerplate",
   "version": "1.0.0",
   "description": "Boilerplate for Game Jams like JS13KGames",
-  "main": "build.js",
+  "main": "script/build.js",
   "scripts": {
-    "start": "node build.js --watch",
-    "build": "node build.js"
+    "start": "node scripts/build.js --watch",
+    "build": "node scripts/build.js"
   },
   "author": "Jerome Lecomte <jerome@herebefrogs.com>",
   "license": "MIT",
