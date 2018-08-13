@@ -340,10 +340,7 @@ onresize = _window.onrotate = function() {
   c.width = WIDTH * scaleToFit;
   c.height = HEIGHT * scaleToFit;
   // disable smoothing on image scaling
-  [ CTX, BUFFER_CTX ].forEach(function(ctx) {
-    // TODO is this still needed for Edge?
-    ctx.msImageSmoothingEnabled = ctx.imageSmoothingEnabled = false;
-  });
+  CTX.imageSmoothingEnabled = BUFFER_CTX.imageSmoothingEnabled = false;
 };
 
 // UTILS
