@@ -7,7 +7,6 @@ game engine
 
 build chain
 ===========
-- optimize images with TinyPNG (https://tinypng.com/developers/reference/nodejs) https://tinypng.com/ or PNG Crusher (https://lospec.com/png-crusher/) + AdvPNG before committing them
 - ? replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
 - ? mangle properties, and use cache names to replace all values matching an object propery that are assigned to a variable (e.g. hero.move = [], action = 'move' becomes a.b = [], c = 'move'... 'move' needs to be converted to 'b')
 

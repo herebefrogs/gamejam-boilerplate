@@ -5,7 +5,8 @@
   "main": "script/build.js",
   "scripts": {
     "start": "node scripts/build.js --watch",
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "tinify-pngs": "node scripts/tinify-pngs.js"
   },
   "author": "Jerome Lecomte <jerome@herebefrogs.com>",
   "license": "MIT",
@@ -13,7 +14,8 @@
     "browser-sync": "^2.23.6",
     "htmlmin": "0.0.7",
     "rollup": "^0.57.1",
-    "terser": "^3.8.1"
+    "terser": "^3.8.1",
+    "tinify": "^1.6.0-beta.2"
   },
   "dependencies": {
     "npm": "^5.10.0"
