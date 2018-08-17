@@ -33,7 +33,9 @@ To automatically optimize any PNG images you commit, create a file named `.git/h
 ```
 #!/bin/sh
 
-npm run tinify-pngs
+if [ -f 'package.json' ]; then
+  npm run tinify-pngs
+fi
 ```
 
 Then make the file executable by running the following command `chmod a+x .git/hooks/pre-commit`

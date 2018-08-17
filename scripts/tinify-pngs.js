@@ -17,21 +17,25 @@ tinify.key = keys.TINIFY_API_KEY;
 // filter PNGs from staged files being committed
 const pngs = execSync('git diff --cached --name-only | grep "png$" | cut -d ":" -f 2').toString();
 
-pngs.trim().split('\n').forEach(async (png) => {
-  const original = statSync(png).size;
+pngs
+ .split('\n')
+ .map(png => png.trim())
+ .filter(png => png !== '')
+ .forEach(async (png) => {
+    const original = statSync(png).size;
 
-  // TinyPNG
-  const image = tinify.fromFile(png);
-  await image.toFile(png);
-  const optimized = statSync(png).size;
+    // TinyPNG
+    const image = tinify.fromFile(png);
+    await image.toFile(png);
+    const optimized = statSync(png).size;
 
-  // AdvPNG
-  execSync(`advpng -l -4 ${png}`);
-  const recompressed = statSync(png).size
+    // AdvPNG
+    execSync(`advpng -l -4 ${png}`);
+    const recompressed = statSync(png).size
 
-  console.log(`${png} ${original} bytes -> TinyPNG ${optimized} bytes -> AdvPNG ${recompressed}`);
+    console.log(`${png} ${original} bytes -> TinyPNG ${optimized} bytes -> AdvPNG ${recompressed}`);
 
-  // stage optimized PNG for inclusion in commit
-  execSync(`git add ${png}`);
-});
+    // stage optimized PNG for inclusion in commit
+    execSync(`git add ${png}`);
+  });
 
