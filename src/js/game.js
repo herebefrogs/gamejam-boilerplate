@@ -369,26 +369,24 @@ onkeydown = function(e) {
   if (!e.repeat) {
     switch (screen) {
       case GAME_SCREEN:
-        switch (e.which) {
-          case 37: // Left arrow
-          case 65: // A - QWERTY
-          case 81: // Q - AZERTY
+        switch (e.code) {
+          case 'ArrowLeft':
+          case 'KeyA':
             hero.moveX = -1;
             break;
-          case 38: // Up arrow
-          case 90: // W - QWERTY
-          case 87: // Z - AZERTY
+          case 'ArrowUp':
+          case 'KeyW':
             hero.moveY = -1;
             break;
-          case 39: // Right arrow
-          case 68: // D
+          case 'ArrowRight':
+          case 'KeyD':
             hero.moveX = 1;
             break;
-          case 40: // Down arrow
-          case 83: // S
+          case 'ArrowDown':
+          case 'KeyS':
             hero.moveY = 1;
             break;
-          case 80: // P
+          case 'KeyP':
             // Pause game as soon as key is pressed
             toggleLoop(!running);
             break;
@@ -408,30 +406,24 @@ onkeyup = function(e) {
       }
       break;
     case GAME_SCREEN:
-      switch (e.which) {
-        case 37: // Left arrow
-        case 65: // A - QWERTY
-        case 81: // Q - AZERTY
+      switch (e.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+        case 'ArrowRight':
+        case 'KeyD':
           hero.moveX = 0;
           break;
-        case 38: // Up arrow
-        case 90: // W - QWERTY
-        case 87: // Z - AZERTY
+        case 'ArrowUp':
+        case 'KeyW':
+        case 'ArrowDown':
+        case 'KeyS':
           hero.moveY = 0;
           break;
-        case 39: // Right arrow
-        case 68: // D
-          hero.moveX = 0;
-          break;
-        case 40: // Down arrow
-        case 83: // S
-          hero.moveY = 0;
-          break;
-      }
+        }
       break;
     case END_SCREEN:
-      switch (e.which) {
-        case 84: // T
+      switch (e.code) {
+        case 'KeyT':
           open(`https://twitter.com/intent/tweet?text=viral%20marketing%20message%20https%3A%2F%2Fgoo.gl%2F${'some tiny Google url here'}`, '_blank');
           break;
         default:
