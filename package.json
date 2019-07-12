@@ -11,13 +11,13 @@
   "author": "Jerome Lecomte <jerome@herebefrogs.com>",
   "license": "MIT",
   "devDependencies": {
-    "browser-sync": "^2.26.5",
+    "browser-sync": "^2.26.7",
     "htmlmin": "0.0.7",
     "rollup": "^0.57.1",
     "terser": "^3.8.1",
     "tinify": "^1.6.0-beta.2"
   },
   "dependencies": {
-    "npm": "^6.9.0"
+    "npm": "^6.10.1"
   }
 }
