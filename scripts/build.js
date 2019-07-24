@@ -15,10 +15,7 @@ const inputOptions = {
   input: 'src/js/game.js',
   plugins: [
     // embed images into source files as data URI
-    dataurl({
-      charset: 'src/img/charset.png',
-      tileset: 'src/img/tileset.png',
-    }),
+    dataurl(),
   ],
 };
 const outputOptions = {
@@ -57,6 +54,9 @@ const compile = async () => {
             zipReport();
           }
           break;
+        case 'ERROR':
+        case 'FATAL':
+          console.error(JSON.stringify(event));
       }
     });
   } else {

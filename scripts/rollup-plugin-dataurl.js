@@ -1,28 +1,38 @@
+/**
+ * Scan every source file for a DATAURL placeholder
+ * and replace the PNG file indicated by its content
+ * as a base64 encoded dataurl
+ *
+ * e.g. const charset = 'DATAURL:src/img/charset.png';
+ * becomes
+ * const charset = 'data:image/png;base64,123456badc0ffee...';
+ */
 const { readFileSync } = require('fs');
-// import { readFileSync } from 'fs'
 
-module.exports = function (options) {
-//export default function (options) {
-  
-  // load and base64 encode every image
-  const assets = Object.entries(options).map(([ variable, file]) => {
-    const data = readFileSync(`./${file}`);
-    return [ variable, `data:image/png;base64,${data.toString('base64')}` ];
-  });
-
-  return {
+module.exports = (options) => ({
     name: 'rollup-plugin-dataurl',
-    // TODO could also be done on the bundle rather than individual imports, but not sure what the impact would be on the sourcemap
+
     transform: (source, id) => {
-      // for every file imported into the bundle, try to locate the variable declaration and embed the image's dataurl
-      let code = source;
+      let transformedCode = source;
 
-      assets.forEach(([ variable, data ]) => {
-         code = code.replace(new RegExp(`let ${variable} = '.*';`, 'gm'),
-                            `let ${variable} = '${data}';`);
-      })
+      // find all DATAURL placeholders, capture the filepaths
+      const matches = [...source.matchAll(/ (.*) = 'DATAURL:(.*)'/g)];
 
-      return { code, map: null };
+      matches.forEach(([, variable, imageFilePath]) => {
+        console.log('found ', variable, imageFilePath);
+        // read the image binary content
+        const data = readFileSync(`./${imageFilePath}`);
+        // replace the placeholder by a base64 encoded dataurl of the image
+        transformedCode = transformedCode.replace(
+          ` ${variable} = 'DATAURL:${imageFilePath}'`,
+          ` ${variable} = 'data:image/png;base64,${data.toString('base64')}'`
+        );
+      });
+
+      console.log('dataurl plugin done with', id);
+      return {
+        code: transformedCode,
+        map: { mappings: ''}
+      };
     }
-  }
-}
+  });
