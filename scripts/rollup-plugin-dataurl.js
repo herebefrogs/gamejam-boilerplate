@@ -7,9 +7,9 @@
  * becomes
  * const charset = 'data:image/png;base64,123456badc0ffee...';
  */
-const { readFileSync } = require('fs');
+import { readFileSync } from 'fs';
 
-module.exports = (options) => ({
+export const dataurl = () => ({
     name: 'rollup-plugin-dataurl',
 
     transform: (source, id) => {
@@ -36,3 +36,7 @@ module.exports = (options) => ({
       };
     }
   });
+
+export default {
+  dataurl
+};
