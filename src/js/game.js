@@ -372,10 +372,12 @@ onkeydown = function(e) {
         switch (e.code) {
           case 'ArrowLeft':
           case 'KeyA':
+          case 'KeyQ':  // French keyboard support
             hero.moveX = -1;
             break;
           case 'ArrowUp':
           case 'KeyW':
+          case 'KeyZ':  // French keyboard support
             hero.moveY = -1;
             break;
           case 'ArrowRight':
@@ -409,12 +411,14 @@ onkeyup = function(e) {
       switch (e.code) {
         case 'ArrowLeft':
         case 'KeyA':
+        case 'KeyQ': // French keyboard support
         case 'ArrowRight':
         case 'KeyD':
           hero.moveX = 0;
           break;
         case 'ArrowUp':
         case 'KeyW':
+        case 'KeyZ': // French keyboard support
         case 'ArrowDown':
         case 'KeyS':
           hero.moveY = 0;
