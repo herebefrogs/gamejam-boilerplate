@@ -1,4 +1,5 @@
 import { rand } from './utils';
+import { checkMonetization } from './monetization';
 
 const _window = window;
 const _document = document;
@@ -60,6 +61,9 @@ let requestId;
 let running = true;
 
 // GAMEPLAY HANDLERS
+
+function unlockExtraContent() {
+}
 
 function startGame() {
   konamiIndex = 0;
@@ -325,6 +329,7 @@ onload = async (e) => {
   _document.title = 'Game Jam Boilerplate';
 
   onresize();
+  //checkMonetization(unlockExtraContent);
 
   charset = await loadImg(charset);
   tileset = await loadImg(tileset);
