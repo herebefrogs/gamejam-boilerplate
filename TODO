@@ -3,7 +3,8 @@ game engine
 - camera-window + edge-snapping + lerp-smoothing (new)
 - sound engine (Soundbox smaller player, Sonant-X, Famitracker, lsdj)
 - gamepad support
-- ? memoize the character's position to avoid calling ALPHABET.indexOf(c) over and over
+- tinyfont.js? https://github.com/darkwebdev/tinyfont.js
+- support multiple voices for speech synthesis
 
 build chain
 ===========

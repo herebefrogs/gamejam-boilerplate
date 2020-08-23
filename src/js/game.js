@@ -1,5 +1,6 @@
 import { rand } from './utils';
 import { checkMonetization } from './monetization';
+import { initSpeech } from './speech';
 
 const _window = window;
 const _document = document;
@@ -16,6 +17,8 @@ let screen = TITLE_SCREEN;
 let countdown; // in seconds
 let hero;
 let entities;
+
+let speak;
 
 // RENDER VARIABLES
 
@@ -333,6 +336,8 @@ onload = async (e) => {
 
   charset = await loadImg(charset);
   tileset = await loadImg(tileset);
+  // speak = await initSpeech();
+
   toggleLoop(true);
 };
 
