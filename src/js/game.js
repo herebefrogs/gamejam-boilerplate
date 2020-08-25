@@ -1,6 +1,7 @@
 import { rand } from './utils';
 import { checkMonetization } from './monetization';
 import { initSpeech } from './speech';
+import { save, load } from './storage';
 
 const _window = window;
 const _document = document;
