@@ -3,8 +3,6 @@ import { checkMonetization } from './monetization';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 
-const _window = window;
-const _document = document;
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
 let konamiIndex = 0;
 
@@ -330,7 +328,7 @@ function toggleLoop(value) {
 
 onload = async (e) => {
   // the real "main" of the game
-  _document.title = 'Game Jam Boilerplate';
+  document.title = 'Game Jam Boilerplate';
 
   onresize();
   //checkMonetization(unlockExtraContent);
@@ -342,7 +340,7 @@ onload = async (e) => {
   toggleLoop(true);
 };
 
-onresize = _window.onrotate = function() {
+onresize = onrotate = function() {
   BUFFER.width = WIDTH;
   BUFFER.height = HEIGHT;
 
@@ -356,7 +354,7 @@ onresize = _window.onrotate = function() {
 
 // UTILS
 
-_document.onvisibilitychange = function(e) {
+document.onvisibilitychange = function(e) {
   // pause loop and game timer when switching tabs
   toggleLoop(!e.target.hidden);
 };
@@ -460,7 +458,7 @@ let touches = [];
 
 // adding onmousedown/move/up triggers a MouseEvent and a PointerEvent
 // on platform that support both (duplicate event, pointer > mouse || touch)
-_window.ontouchstart = _window.onpointerdown = function(e) {
+ontouchstart = onpointerdown = function(e) {
   e.preventDefault();
   switch (screen) {
     case GAME_SCREEN:
@@ -469,7 +467,7 @@ _window.ontouchstart = _window.onpointerdown = function(e) {
   }
 };
 
-_window.ontouchmove = _window.onpointermove = function(e) {
+ontouchmove = onpointermove = function(e) {
   e.preventDefault();
   switch (screen) {
     case GAME_SCREEN:
@@ -480,7 +478,7 @@ _window.ontouchmove = _window.onpointermove = function(e) {
   }
 }
 
-_window.ontouchend = _window.onpointerup = function(e) {
+ontouchend = onpointerup = function(e) {
   e.preventDefault();
   switch (screen) {
     case TITLE_SCREEN:
