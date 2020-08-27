@@ -1,9 +1,9 @@
 game engine
 ===========
-- camera-window + edge-snapping + lerp-smoothing (new)
-- gamepad support
+- lerp-smoothing?
+- gamepad support?
 - tinyfont.js? https://github.com/darkwebdev/tinyfont.js
-- support multiple voices for speech synthesis
+- support multiple voices for speech synthesis?
 
 build chain
 ===========

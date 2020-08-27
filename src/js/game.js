@@ -24,11 +24,24 @@ let speak;
 
 // RENDER VARIABLES
 
+
 const CTX = c.getContext('2d');         // visible canvas
-const WIDTH = 320;
-const HEIGHT = 240;
-const BUFFER = c.cloneNode();           // visible portion of map
-const BUFFER_CTX = BUFFER.getContext('2d');
+const MAP = c.cloneNode();              // full map rendered off screen
+const MAP_CTX = MAP.getContext('2d');
+MAP.width = 640;                        // map size
+MAP.height = 480;
+const VIEWPORT = c.cloneNode();           // visible portion of map/viewport
+const VIEWPORT_CTX = VIEWPORT.getContext('2d');
+VIEWPORT.width = 320;                      // viewport size
+VIEWPORT.height = 240;
+
+// camera-window & edge-snapping settings
+const CAMERA_WINDOW_X = 100;
+const CAMERA_WINDOW_Y = 50;
+const CAMERA_WINDOW_WIDTH = VIEWPORT.width - CAMERA_WINDOW_X;
+const CAMERA_WINDOW_HEIGHT = VIEWPORT.height - CAMERA_WINDOW_Y;
+let viewportOffsetX = 0;
+let viewportOffsetY = 0;
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/';
 const ALIGN_LEFT = 0;
@@ -73,14 +86,23 @@ function unlockExtraContent() {
 function startGame() {
   konamiIndex = 0;
   countdown = 60;
-  hero = createEntity('hero', WIDTH / 2, HEIGHT / 2);
+  viewportOffsetX = viewportOffsetY = 0;
+  hero = createEntity('hero', VIEWPORT.width / 2, VIEWPORT.height / 2);
   entities = [
     hero,
+    createEntity('foe', 10, 10),
+    createEntity('foe', 630 - 16, 10),
+    createEntity('foe', 630 - 16, 470 - 18),
+    createEntity('foe', 300, 200),
+    createEntity('foe', 400, 300),
+    createEntity('foe', 500, 400),
+    createEntity('foe', 10, 470 - 18),
     createEntity('foe', 100, 100),
     createEntity('foe', 100, 118),
     createEntity('foe', 116, 118),
     createEntity('foe', 116, 100),
   ];
+  renderMap();
   screen = GAME_SCREEN;
 };
 
@@ -173,13 +195,30 @@ function correctAABBCollision(entity1, entity2, test) {
 function constrainToViewport(entity) {
   if (entity.x < 0) {
     entity.x = 0;
-  } else if (entity.x > WIDTH - entity.w) {
-    entity.x = WIDTH - entity.w;
+  } else if (entity.x > MAP.width - entity.w) {
+    entity.x = MAP.width - entity.w;
   }
   if (entity.y < 0) {
     entity.y = 0;
-  } else if (entity.y > HEIGHT - entity.h) {
-    entity.y = HEIGHT - entity.h;
+  } else if (entity.y > MAP.height - entity.h) {
+    entity.y = MAP.height - entity.h;
+  }
+};
+
+
+function updateCameraWindow() {
+  // edge snapping
+  if (0 < viewportOffsetX && hero.x < viewportOffsetX + CAMERA_WINDOW_X) {
+    viewportOffsetX = Math.max(0, hero.x - CAMERA_WINDOW_X);
+  }
+  else if (viewportOffsetX < MAP.width - VIEWPORT.width && hero.x + hero.w > viewportOffsetX + CAMERA_WINDOW_WIDTH) {
+    viewportOffsetX = Math.min(MAP.width - VIEWPORT.width, hero.x + hero.w - CAMERA_WINDOW_WIDTH);
+  }
+  if (0 < viewportOffsetY && hero.y < viewportOffsetY + CAMERA_WINDOW_Y) {
+    viewportOffsetY = Math.max(0, hero.y - CAMERA_WINDOW_Y);
+  }
+  else if (viewportOffsetY < MAP.height - VIEWPORT.height && hero.y + hero.h > viewportOffsetY + CAMERA_WINDOW_HEIGHT) {
+    viewportOffsetY = Math.min(MAP.height - VIEWPORT.height, hero.y + hero.h - CAMERA_WINDOW_HEIGHT);
   }
 };
 
@@ -230,6 +269,7 @@ function update() {
         }
       });
       constrainToViewport(hero);
+      updateCameraWindow();
       break;
   }
 };
@@ -239,25 +279,31 @@ function update() {
 function blit() {
   // copy backbuffer onto visible canvas, scaling it to screen dimensions
   CTX.drawImage(
-    BUFFER,
-    0, 0, WIDTH, HEIGHT,
+    VIEWPORT,
+    0, 0, VIEWPORT.width, VIEWPORT.height,
     0, 0, c.width, c.height
   );
 };
 
 function render() {
-  BUFFER_CTX.fillStyle = '#fff';
-  BUFFER_CTX.fillRect(0, 0, WIDTH, HEIGHT);
+  VIEWPORT_CTX.fillStyle = '#fff';
+  VIEWPORT_CTX.fillRect(0, 0, VIEWPORT.width, VIEWPORT.height);
 
   switch (screen) {
     case TITLE_SCREEN:
       renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
-      renderText('press any key', WIDTH / 2, HEIGHT / 2, ALIGN_CENTER);
+      renderText('press any key', VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
-        renderText('konami mode on', WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+        renderText('konami mode on', VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
       }
       break;
     case GAME_SCREEN:
+      VIEWPORT_CTX.drawImage(
+        MAP,
+        // adjust x/y offset
+        viewportOffsetX, viewportOffsetY, VIEWPORT.width, VIEWPORT.height,
+        0, 0, VIEWPORT.width, VIEWPORT.height
+      );
       renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
       // uncomment to debug mobile input handlers
@@ -275,17 +321,24 @@ function render() {
 function renderCountdown() {
   const minutes = Math.floor(Math.ceil(countdown) / 60);
   const seconds = Math.ceil(countdown) - minutes * 60;
-  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
 
 };
 
 function renderEntity(entity) {
   const sprite = ATLAS[entity.type][entity.action][entity.frame];
-  BUFFER_CTX.drawImage(
+  // TODO skip draw if image outside of visible canvas
+  VIEWPORT_CTX.drawImage(
     tileset,
     sprite.x, sprite.y, sprite.w, sprite.h,
-    Math.round(entity.x), Math.round(entity.y), sprite.w, sprite.h
+    Math.round(entity.x - viewportOffsetX), Math.round(entity.y - viewportOffsetY), sprite.w, sprite.h
   );
+};
+
+function renderMap() {
+  MAP_CTX.fillStyle = 'white';
+  MAP_CTX.fillRect(0, 0, MAP.width, MAP.height);
+  // TODO cache map by rendering static entities on the MAP canvas
 };
 
 function renderText(msg, x, y, align = ALIGN_LEFT, scale = 1) {
@@ -295,7 +348,7 @@ function renderText(msg, x, y, align = ALIGN_LEFT, scale = 1) {
                        align === ALIGN_CENTER ? MSG_WIDTH / 2 :
                        0;
   [...msg].forEach((c, i) => {
-    BUFFER_CTX.drawImage(
+    VIEWPORT_CTX.drawImage(
       charset,
       // TODO could memoize the characters index or hardcode a lookup table
       ALPHABET.indexOf(c)*CHARSET_SIZE, 0, CHARSET_SIZE, CHARSET_SIZE,
@@ -344,15 +397,12 @@ onload = async (e) => {
 };
 
 onresize = onrotate = function() {
-  BUFFER.width = WIDTH;
-  BUFFER.height = HEIGHT;
-
   // scale canvas to fit screen while maintaining aspect ratio
-  const scaleToFit = Math.min(innerWidth / WIDTH, innerHeight / HEIGHT);
-  c.width = WIDTH * scaleToFit;
-  c.height = HEIGHT * scaleToFit;
+  const scaleToFit = Math.min(innerWidth / VIEWPORT.width, innerHeight / VIEWPORT.height);
+  c.width = VIEWPORT.width * scaleToFit;
+  c.height = VIEWPORT.height * scaleToFit;
   // disable smoothing on image scaling
-  CTX.imageSmoothingEnabled = BUFFER_CTX.imageSmoothingEnabled = false;
+  CTX.imageSmoothingEnabled = MAP_CTX.imageSmoothingEnabled = VIEWPORT_CTX.imageSmoothingEnabled = false;
 };
 
 // UTILS
@@ -560,45 +610,45 @@ function setTouchPosition([x, y]) {
 };
 
 function addDebugTouch(x, y) {
-  touches.push([x / innerWidth * WIDTH, y / innerHeight * HEIGHT]);
+  touches.push([x / innerWidth * VIEWPORT.width, y / innerHeight * VIEWPORT.height]);
   if (touches.length > 10) {
     touches = touches.slice(touches.length - 10);
   }
 };
 
 function renderDebugTouch() {
-  let x = maxX / innerWidth * WIDTH;
-  let y = maxY / innerHeight * HEIGHT;
-  renderDebugTouchBound(x, x, 0, HEIGHT, '#f00');
-  renderDebugTouchBound(0, WIDTH, y, y, '#f00');
-  x = minX / innerWidth * WIDTH;
-  y = minY / innerHeight * HEIGHT;
-  renderDebugTouchBound(x, x, 0, HEIGHT, '#ff0');
-  renderDebugTouchBound(0, WIDTH, y, y, '#ff0');
+  let x = maxX / innerWidth * VIEWPORT.width;
+  let y = maxY / innerHeight * VIEWPORT.height;
+  renderDebugTouchBound(x, x, 0, VIEWPORT.height, '#f00');
+  renderDebugTouchBound(0, VIEWPORT.width, y, y, '#f00');
+  x = minX / innerWidth * VIEWPORT.width;
+  y = minY / innerHeight * VIEWPORT.height;
+  renderDebugTouchBound(x, x, 0, VIEWPORT.height, '#ff0');
+  renderDebugTouchBound(0, VIEWPORT.width, y, y, '#ff0');
 
   if (touches.length) {
-    BUFFER_CTX.strokeStyle = BUFFER_CTX.fillStyle =   '#02d';
-    BUFFER_CTX.beginPath();
+    VIEWPORT_CTX.strokeStyle = VIEWPORT_CTX.fillStyle =   '#02d';
+    VIEWPORT_CTX.beginPath();
     [x, y] = touches[0];
-    BUFFER_CTX.moveTo(x, y);
+    VIEWPORT_CTX.moveTo(x, y);
     touches.forEach(function([x, y]) {
-      BUFFER_CTX.lineTo(x, y);
+      VIEWPORT_CTX.lineTo(x, y);
     });
-    BUFFER_CTX.stroke();
-    BUFFER_CTX.closePath();
-    BUFFER_CTX.beginPath();
+    VIEWPORT_CTX.stroke();
+    VIEWPORT_CTX.closePath();
+    VIEWPORT_CTX.beginPath();
     [x, y] = touches[touches.length - 1];
-    BUFFER_CTX.arc(x, y, 2, 0, 2 * Math.PI)
-    BUFFER_CTX.fill();
-    BUFFER_CTX.closePath();
+    VIEWPORT_CTX.arc(x, y, 2, 0, 2 * Math.PI)
+    VIEWPORT_CTX.fill();
+    VIEWPORT_CTX.closePath();
   }
 };
 
 function renderDebugTouchBound(_minX, _maxX, _minY, _maxY, color) {
-  BUFFER_CTX.strokeStyle = color;
-  BUFFER_CTX.beginPath();
-  BUFFER_CTX.moveTo(_minX, _minY);
-  BUFFER_CTX.lineTo(_maxX, _maxY);
-  BUFFER_CTX.stroke();
-  BUFFER_CTX.closePath();
+  VIEWPORT_CTX.strokeStyle = color;
+  VIEWPORT_CTX.beginPath();
+  VIEWPORT_CTX.moveTo(_minX, _minY);
+  VIEWPORT_CTX.lineTo(_maxX, _maxY);
+  VIEWPORT_CTX.stroke();
+  VIEWPORT_CTX.closePath();
 };
