@@ -92,10 +92,11 @@ This is where things diverge a bit:
   - Finally, a small report will tell you how big the ZIP is and what's your size budget left if you're participating to JS13KGAMES.
 
 
-Special Thanks
---------------
+Special Thanks & Credits
+------------------------
 - Eoin McGrath for his original build script
 - [Peters](https://twitter.com/p1100i) and [flo-](https://twitter.com/fl0ptimus_prime) for their pixel font from Glitch Hunter
 - [Ryan Malm](https://twitter.com/ryanmalm) for sharing his Twitter message code
 - [Maxime Euziere](https://twitter.com/MaximeEuziere) for his switch/case approach to handling game screens in update/render/input handlers
 - Florent Cailhol for suggesting Terser in place of UglifyJS
+- [Frank Force](https://twitter.com/KilledByAPixel) and [Keith Clark](https://keithclark.co.uk/) for their über smoll sound & music players, [ZzFX](https://github.com/KilledByAPixel/ZzFX) and [ZzFX Music](https://github.com/keithclark/ZzFXM) respectively

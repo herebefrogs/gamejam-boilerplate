@@ -1,7 +1,10 @@
 import { rand } from './utils';
 import { checkMonetization } from './monetization';
+import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
+
+
 
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
 let konamiIndex = 0;
