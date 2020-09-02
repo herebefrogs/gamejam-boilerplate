@@ -1,5 +1,10 @@
 // available alphabet (must match characters in the alphabet sprite exactly)
-export const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/';
+// U = up arrow
+// D = down arrow
+// L = left arrow
+// R = right arrow
+// T = teapot icon
+export const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/#[]UDLR?\'';
 
 export const ALIGN_LEFT = 0;
 export const ALIGN_CENTER = 1;
@@ -7,7 +12,7 @@ export const ALIGN_RIGHT = 2;
 
 // alphabet sprite, embedded as a base64 encoded dataurl by build script
 export let charset = 'DATAURL:src/img/charset.png';
-export const CHARSET_SIZE = 8; // in px
+export const CHARSET_SIZE = 5; // in px
 
 export const initCharset = async loadImg => {
   charset = await loadImg(charset);
@@ -33,7 +38,7 @@ export function renderText(msg, ctx, x, y, align = ALIGN_LEFT, scale = 1) {
       charset,
       // TODO could memoize the characters index or hardcode a lookup table
       ALPHABET.indexOf(c)*CHARSET_SIZE, 0, CHARSET_SIZE, CHARSET_SIZE,
-      x + i*SCALED_SIZE - ALIGN_OFFSET, y, SCALED_SIZE, SCALED_SIZE
+      x + i*(SCALED_SIZE + 1) - ALIGN_OFFSET, y, SCALED_SIZE, SCALED_SIZE
     );
   });
 };

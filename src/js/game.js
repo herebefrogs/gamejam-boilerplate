@@ -280,7 +280,7 @@ function blit() {
 };
 
 function render() {
-  VIEWPORT_CTX.fillStyle = '#fff';
+  VIEWPORT_CTX.fillStyle = '#000';
   VIEWPORT_CTX.fillRect(0, 0, VIEWPORT.width, VIEWPORT.height);
 
   switch (screen) {
@@ -330,7 +330,7 @@ function renderEntity(entity) {
 };
 
 function renderMap() {
-  MAP_CTX.fillStyle = 'white';
+  MAP_CTX.fillStyle = '#000';
   MAP_CTX.fillRect(0, 0, MAP.width, MAP.height);
   // TODO cache map by rendering static entities on the MAP canvas
 };
