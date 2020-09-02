@@ -1,10 +1,10 @@
-import { rand } from './utils';
+import { isMobile } from './mobile';
 import { checkMonetization } from './monetization';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
-
+import { rand } from './utils';
 
 
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -286,7 +286,7 @@ function render() {
   switch (screen) {
     case TITLE_SCREEN:
       renderText('title screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
-      renderText('press any key', VIEWPORT_CTX, VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
+      renderText(isMobile ? 'tap to start' : 'press any key', VIEWPORT_CTX, VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
         renderText('konami mode on', VIEWPORT_CTX, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
       }
