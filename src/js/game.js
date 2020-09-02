@@ -3,6 +3,7 @@ import { checkMonetization } from './monetization';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
+import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
 
 
 
@@ -24,7 +25,6 @@ let speak;
 
 // RENDER VARIABLES
 
-
 const CTX = c.getContext('2d');         // visible canvas
 const MAP = c.cloneNode();              // full map rendered off screen
 const MAP_CTX = MAP.getContext('2d');
@@ -43,10 +43,6 @@ const CAMERA_WINDOW_HEIGHT = VIEWPORT.height - CAMERA_WINDOW_Y;
 let viewportOffsetX = 0;
 let viewportOffsetY = 0;
 
-const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/';
-const ALIGN_LEFT = 0;
-const ALIGN_CENTER = 1;
-const ALIGN_RIGHT = 2;
 const ATLAS = {
   hero: {
     move: [
@@ -65,9 +61,7 @@ const ATLAS = {
     speed: 0,
   },
 };
-const CHARSET_SIZE = 8; // in px
 const FRAME_DURATION = 0.1; // duration of 1 animation frame, in seconds
-let charset = 'DATAURL:src/img/charset.png';   // alphabet sprite, embedded as a base64 encoded dataurl by build script
 let tileset = 'DATAURL:src/img/tileset.png';   // characters sprite, embedded as a base64 encoded dataurl by build script
 
 // LOOP VARIABLES
@@ -291,10 +285,10 @@ function render() {
 
   switch (screen) {
     case TITLE_SCREEN:
-      renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
-      renderText('press any key', VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
+      renderText('title screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
+      renderText('press any key', VIEWPORT_CTX, VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
-        renderText('konami mode on', VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+        renderText('konami mode on', VIEWPORT_CTX, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
       }
       break;
     case GAME_SCREEN:
@@ -304,14 +298,14 @@ function render() {
         viewportOffsetX, viewportOffsetY, VIEWPORT.width, VIEWPORT.height,
         0, 0, VIEWPORT.width, VIEWPORT.height
       );
-      renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
+      renderText('game screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
       // uncomment to debug mobile input handlers
       // renderDebugTouch();
       entities.forEach(renderEntity);
       break;
     case END_SCREEN:
-      renderText('end screen', CHARSET_SIZE, CHARSET_SIZE);
+      renderText('end screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
       break;
   }
 
@@ -321,7 +315,7 @@ function render() {
 function renderCountdown() {
   const minutes = Math.floor(Math.ceil(countdown) / 60);
   const seconds = Math.ceil(countdown) - minutes * 60;
-  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, VIEWPORT_CTX, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
 
 };
 
@@ -339,22 +333,6 @@ function renderMap() {
   MAP_CTX.fillStyle = 'white';
   MAP_CTX.fillRect(0, 0, MAP.width, MAP.height);
   // TODO cache map by rendering static entities on the MAP canvas
-};
-
-function renderText(msg, x, y, align = ALIGN_LEFT, scale = 1) {
-  const SCALED_SIZE = scale * CHARSET_SIZE;
-  const MSG_WIDTH = msg.length * SCALED_SIZE;
-  const ALIGN_OFFSET = align === ALIGN_RIGHT ? MSG_WIDTH :
-                       align === ALIGN_CENTER ? MSG_WIDTH / 2 :
-                       0;
-  [...msg].forEach((c, i) => {
-    VIEWPORT_CTX.drawImage(
-      charset,
-      // TODO could memoize the characters index or hardcode a lookup table
-      ALPHABET.indexOf(c)*CHARSET_SIZE, 0, CHARSET_SIZE, CHARSET_SIZE,
-      x + i*SCALED_SIZE - ALIGN_OFFSET, y, SCALED_SIZE, SCALED_SIZE
-    );
-  });
 };
 
 // LOOP HANDLERS
@@ -389,7 +367,7 @@ onload = async (e) => {
   onresize();
   //checkMonetization(unlockExtraContent);
 
-  charset = await loadImg(charset);
+  await initCharset(loadImg);
   tileset = await loadImg(tileset);
   // speak = await initSpeech();
 
