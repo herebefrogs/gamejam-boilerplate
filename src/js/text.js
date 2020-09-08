@@ -24,7 +24,7 @@ export const initCharset = async loadImg => {
  */
 export function renderText(msg, ctx, x, y, align = ALIGN_LEFT, scale = 1) {
   const SCALED_SIZE = scale * CHARSET_SIZE;
-  const MSG_WIDTH = msg.length * SCALED_SIZE;
+  const MSG_WIDTH = msg.length * (scale + SCALED_SIZE);
   const ALIGN_OFFSET = align === ALIGN_RIGHT ? MSG_WIDTH :
                        align === ALIGN_CENTER ? MSG_WIDTH / 2 :
                        0;
