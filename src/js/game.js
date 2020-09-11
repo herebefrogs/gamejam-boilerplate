@@ -541,16 +541,12 @@ function setTouchPosition([x, y]) {
   // touch moving further right
   if (x > maxX) {
     maxX = x;
-    if (maxX - minX > MIN_DISTANCE) {
-      hero.moveX = 1;
-    }
+    hero.moveX = lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
   }
   // touch moving further left
   else if (x < minX) {
     minX = x;
-    if (maxX - minX > MIN_DISTANCE) {
-      hero.moveX = -1;
-    }
+    hero.moveX = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
   }
   // touch reversing left while hero moving right
   else if (x < maxX && hero.moveX > 0) {
@@ -566,16 +562,14 @@ function setTouchPosition([x, y]) {
   // touch moving further down
   if (y > maxY) {
     maxY = y;
-    if (maxY - minY > MIN_DISTANCE) {
-      hero.moveY = 1;
-    }
+    hero.moveY = lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
+
   }
   // touch moving further up
   else if (y < minY) {
     minY = y;
-    if (maxY - minY > MIN_DISTANCE) {
-      hero.moveY = -1;
-    }
+    hero.moveY = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
+
   }
   // touch reversing up while hero moving down
   else if (y < maxY && hero.moveY > 0) {
