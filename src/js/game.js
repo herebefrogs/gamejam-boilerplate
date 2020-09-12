@@ -20,6 +20,7 @@ let screen = TITLE_SCREEN;
 // factor by which to reduce both moveX and moveY when player moving diagonally
 // so they don't seem to move faster than when traveling vertically or horizontally
 const RADIUS_ONE_AT_45_DEG = Math.cos(Math.PI / 4);
+const STEERING_DURATION = 150;                // in millis, duration till going full left or right
 
 let countdown; // in seconds
 let hero;
@@ -228,6 +229,10 @@ function createEntity(type, x = 0, y = 0) {
     frame: 0,
     frameTime: 0,
     h: sprite.h,
+    moveDown: 0,
+    moveLeft: 0,
+    moveRight: 0,
+    moveUp: 0,
     moveX: 0,
     moveY: 0,
     speed: ATLAS[type].speed,
@@ -237,6 +242,25 @@ function createEntity(type, x = 0, y = 0) {
     y,
   };
 };
+
+function updateHeroInput() {
+  // TODO can touch & desktop be handled the same way?
+  if (isTouch) {
+    hero.moveX = hero.moveLeft + hero.moveRight;
+    hero.moveY = hero.moveUp + hero.moveDown;
+  } else {
+    if (hero.moveLeft || hero.moveRight) {
+      hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / STEERING_DURATION)
+    } else {
+      hero.moveX = 0;
+    }
+    if (hero.moveDown || hero.moveUp) {
+      hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / STEERING_DURATION)
+    } else {
+      hero.moveY = 0;
+    }
+  }
+}
 
 function updateEntity(entity) {
   // update animation frame
@@ -260,6 +284,7 @@ function update() {
       if (countdown < 0) {
         screen = END_SCREEN;
       }
+      updateHeroInput();
       entities.forEach(updateEntity);
       entities.slice(1).forEach((entity) => {
         const test = testAABBCollision(hero, entity);
@@ -418,20 +443,20 @@ onkeydown = function(e) {
           case 'ArrowLeft':
           case 'KeyA':
           case 'KeyQ':  // French keyboard support
-            hero.moveX = -1;
+            hero.moveLeft = currentTime;
             break;
           case 'ArrowUp':
           case 'KeyW':
           case 'KeyZ':  // French keyboard support
-            hero.moveY = -1;
+            hero.moveUp = currentTime;
             break;
           case 'ArrowRight':
           case 'KeyD':
-            hero.moveX = 1;
+            hero.moveRight = currentTime;
             break;
           case 'ArrowDown':
           case 'KeyS':
-            hero.moveY = 1;
+            hero.moveDown = currentTime;
             break;
           case 'KeyP':
             // Pause game as soon as key is pressed
@@ -457,16 +482,36 @@ onkeyup = function(e) {
         case 'ArrowLeft':
         case 'KeyA':
         case 'KeyQ': // French keyboard support
+          if (hero.moveRight) {
+            // reversing right while hero moving left
+            hero.moveRight = currentTime;
+          }
+          hero.moveLeft = 0;
+          break;
         case 'ArrowRight':
         case 'KeyD':
-          hero.moveX = 0;
+          if (hero.moveLeft) {
+            // reversing left while hero moving right
+            hero.moveLeft = currentTime;
+          }
+          hero.moveRight = 0;
           break;
         case 'ArrowUp':
         case 'KeyW':
         case 'KeyZ': // French keyboard support
+          if (hero.moveDown) {
+            // reversing down while hero moving up
+            hero.moveDown = currentTime;
+          }
+          hero.moveUp = 0;
+          break;
         case 'ArrowDown':
         case 'KeyS':
-          hero.moveY = 0;
+          if (hero.moveUp) {
+            // reversing up while hero moving down
+            hero.moveUp = currentTime;
+          }
+          hero.moveDown = 0;
           break;
         }
       break;
@@ -491,6 +536,7 @@ let maxX = 0;
 let maxY = 0;
 let MIN_DISTANCE = 30; // in px
 let touches = [];
+let isTouch = false;
 
 // adding onmousedown/move/up triggers a MouseEvent and a PointerEvent
 // on platform that support both (duplicate event, pointer > mouse || touch)
@@ -498,6 +544,7 @@ ontouchstart = onpointerdown = function(e) {
   e.preventDefault();
   switch (screen) {
     case GAME_SCREEN:
+      isTouch = true;
       [maxX, maxY] = [minX, minY] = pointerLocation(e);
       break;
   }
@@ -521,8 +568,9 @@ ontouchend = onpointerup = function(e) {
       startGame();
       break;
     case GAME_SCREEN:
+      isTouch = false;
       // stop hero
-      hero.moveX = hero.moveY = 0;
+      hero.moveLeft = hero.moveRight = hero.moveDown = hero.moveUp = 0;
       // end touch
       minX = minY = maxX = maxY = 0;
       break;
@@ -541,45 +589,45 @@ function setTouchPosition([x, y]) {
   // touch moving further right
   if (x > maxX) {
     maxX = x;
-    hero.moveX = lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
+    hero.moveRight = lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
   }
   // touch moving further left
   else if (x < minX) {
     minX = x;
-    hero.moveX = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
+    hero.moveLeft = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
   }
   // touch reversing left while hero moving right
   else if (x < maxX && hero.moveX > 0) {
     minX = x;
-    hero.moveX = 0;
+    hero.moveRight = 0;
   }
   // touch reversing right while hero moving left
   else if (minX < x && hero.moveX < 0) {
     maxX = x;
-    hero.moveX = 0;
+    hero.moveLeft = 0;
   }
 
   // touch moving further down
   if (y > maxY) {
     maxY = y;
-    hero.moveY = lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
+    hero.moveDown = lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
 
   }
   // touch moving further up
   else if (y < minY) {
     minY = y;
-    hero.moveY = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
+    hero.moveUp = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
 
   }
   // touch reversing up while hero moving down
   else if (y < maxY && hero.moveY > 0) {
     minY = y;
-    hero.moveY = 0;
+    hero.moveDown = 0;
   }
   // touch reversing down while hero moving up
   else if (minY < y && hero.moveY < 0) {
     maxY = y;
-    hero.moveY = 0;
+    hero.moveUp = 0;
   }
 
   // uncomment to debug mobile input handlers
