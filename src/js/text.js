@@ -4,7 +4,7 @@
 // L = left arrow
 // R = right arrow
 // T = teapot icon
-export const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/#[]UDLR?\'';
+export const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789.:!-%,/';
 
 export const ALIGN_LEFT = 0;
 export const ALIGN_CENTER = 1;
@@ -12,7 +12,7 @@ export const ALIGN_RIGHT = 2;
 
 // alphabet sprite, embedded as a base64 encoded dataurl by build script
 export let charset = 'DATAURL:src/img/charset.png';
-export const CHARSET_SIZE = 5; // in px
+export const CHARSET_SIZE = 8; // in px
 
 export const initCharset = async loadImg => {
   charset = await loadImg(charset);

@@ -4,7 +4,7 @@ import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
-import { rand } from './utils';
+import { lerp, rand } from './utils';
 
 
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -310,7 +310,7 @@ function blit() {
 };
 
 function render() {
-  VIEWPORT_CTX.fillStyle = '#000';
+  VIEWPORT_CTX.fillStyle = '#fff';
   VIEWPORT_CTX.fillRect(0, 0, VIEWPORT.width, VIEWPORT.height);
 
   switch (screen) {
@@ -360,7 +360,7 @@ function renderEntity(entity) {
 };
 
 function renderMap() {
-  MAP_CTX.fillStyle = '#000';
+  MAP_CTX.fillStyle = '#fff';
   MAP_CTX.fillRect(0, 0, MAP.width, MAP.height);
   // TODO cache map by rendering static entities on the MAP canvas
 };
