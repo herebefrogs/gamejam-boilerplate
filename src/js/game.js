@@ -17,6 +17,10 @@ const GAME_SCREEN = 1;
 const END_SCREEN = 2;
 let screen = TITLE_SCREEN;
 
+// factor by which to reduce both moveX and moveY when player moving diagonally
+// so they don't seem to move faster than when traveling vertically or horizontally
+const RADIUS_ONE_AT_45_DEG = Math.cos(Math.PI / 4);
+
 let countdown; // in seconds
 let hero;
 let entities;
@@ -243,7 +247,8 @@ function updateEntity(entity) {
     entity.frame %= ATLAS[entity.type][entity.action].length;
   }
   // update position
-  const distance = entity.speed * elapsedTime;
+  const scale = entity.moveX && entity.moveY ? RADIUS_ONE_AT_45_DEG : 1;
+  const distance = entity.speed * elapsedTime * scale;
   entity.x += distance * entity.moveX;
   entity.y += distance * entity.moveY;
 };
