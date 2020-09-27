@@ -69,7 +69,7 @@ The `render` function goes through every entity and will display the proper bitm
 The game is automatically paused if the player change browser tab (`onvisibilitychange` event handler).
 
 Keyboard control is achieved by the `onkeydown` and `onkeyup` event handlers, which only record the direction in which the player wants to move so as no to block the event thread.
-Mouse and touchscreen support is achieved by the `ontouchstart/onpointerdown`, 'ontouchmove/onpointermove' and 'ontouchend/onpointerup` even handlers.
+Mouse and touchscreen support is achieved by the `ontouchstart/onpointerdown`, `ontouchmove/onpointermove` and `ontouchend/onpointerup` even handlers.
 
 The boilerplate will recognize the Konami code on the title screen. You're then free to enable any behaviour or cheat you see fit.
 
@@ -99,4 +99,5 @@ Special Thanks & Credits
 - [Ryan Malm](https://twitter.com/ryanmalm) for sharing his Twitter message code
 - [Maxime Euziere](https://twitter.com/MaximeEuziere) for his switch/case approach to handling game screens in update/render/input handlers
 - Florent Cailhol for suggesting Terser in place of UglifyJS
+- [Matt](https://twitter.com/Smflyf) for pointing out the existence of `advzip-bin`
 - [Frank Force](https://twitter.com/KilledByAPixel) and [Keith Clark](https://keithclark.co.uk/) for their über smoll sound & music players, [ZzFX](https://github.com/KilledByAPixel/ZzFX) and [ZzFX Music](https://github.com/keithclark/ZzFXM) respectively
