@@ -19,7 +19,7 @@
   "license": "MIT",
   "devDependencies": {
     "advzip-bin": "^2.0.0",
-    "browser-sync": "^2.26.7",
+    "browser-sync": "^2.26.14",
     "chokidar-cli": "^2.0.0",
     "html-inline": "^1.2.0",
     "html-minifier": "^4.0.0",
