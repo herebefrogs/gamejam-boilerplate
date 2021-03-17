@@ -67,7 +67,7 @@ const ATLAS = {
   },
 };
 const FRAME_DURATION = 0.1; // duration of 1 animation frame, in seconds
-let tileset = 'DATAURL:src/img/tileset.png';   // characters sprite, embedded as a base64 encoded dataurl by build script
+let tileset = 'DATAURL:src/img/tileset.webp';   // characters sprite, embedded as a base64 encoded dataurl by build script
 
 // LOOP VARIABLES
 

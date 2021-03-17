@@ -7,7 +7,11 @@ game engine
 
 build chain
 ===========
-- ? replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
-- ? mangle properties, and use cache names to replace all values matching an object propery that are assigned to a variable (e.g. hero.move = [], action = 'move' becomes a.b = [], c = 'move'... 'move' needs to be converted to 'b')
+custom:
+- replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
+- mangle properties, and use cache names to replace all values matching an object propery that are assigned to a variable (e.g. hero.move = [], action = 'move' becomes a.b = [], c = 'move'... 'move' needs to be converted to 'b')
+libs:
+- esbuild in place of rollup/terser (faster build, but what about file size?)
 - ECT (https://github.com/fhanau/Efficient-Compression-Tool) in place of AdvZip? no Homebrew buidl for Mac :(
+- avif in place of png/webp (not enough browser support yet)
 

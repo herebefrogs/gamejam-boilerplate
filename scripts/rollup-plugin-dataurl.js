@@ -19,13 +19,14 @@ export const dataurl = () => ({
       const matches = [...source.matchAll(/ (.*) = 'DATAURL:(.*)'/g)];
 
       matches.forEach(([, variable, imageFilePath]) => {
+        const [, fileExt] = imageFilePath.match(/\.(.*)/);
         console.log('found ', variable, imageFilePath);
         // read the image binary content
         const data = readFileSync(`./${imageFilePath}`);
         // replace the placeholder by a base64 encoded dataurl of the image
         transformedCode = transformedCode.replace(
           ` ${variable} = 'DATAURL:${imageFilePath}'`,
-          ` ${variable} = 'data:image/png;base64,${data.toString('base64')}'`
+          ` ${variable} = 'data:image/${fileExt};base64,${data.toString('base64')}'`
         );
       });
 
