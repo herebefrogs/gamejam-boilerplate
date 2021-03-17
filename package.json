@@ -6,27 +6,25 @@
   "scripts": {
     "clean": "rm -rf dist && mkdir dist",
     "build": "run-s clean build:*",
-    "build:js": "rollup -c scripts/rollup.config.js --environment MINIFY",
+    "build:js": "esbuild src/js/game.js --bundle --format=iife --loader:.webp=dataurl | terser --config-file scripts/terser.config.js -o dist/game.js",
     "build:html": "grep -v '<body' src/index.html | html-inline -b dist | html-minifier -c scripts/htmlmin.json -o dist/index.html",
     "build:zip": "zip -FS -qjX9 dist/game.zip dist/index.html && advzip -z -4 dist/game.zip",
     "build:zipSize": "node scripts/zipSize.js",
     "start": "npm-run-all -s clean -p dev:*",
-    "dev:js": "rollup -c scripts/rollup.config.js -w --environment DEBUG",
+    "dev:js": "esbuild src/js/game.js --bundle --format=iife --loader:.webp=dataurl --sourcemap --outfile=dist/game.js --watch",
     "dev:serve_watch_html_js": "browser-sync 'dist' 'src' --watch --host 0.0.0.0 --https",
-    "dev:watch_img": "chokidar src/img -d 0 -c 'npm run dev:js'",
-    "tinify-pngs": "node scripts/tinify-pngs.js"
+    "dev:watch_img": "chokidar src/img -d 0 -c 'npm run dev:js'"
   },
   "license": "MIT",
   "devDependencies": {
     "advzip-bin": "^2.0.0",
     "browser-sync": "^2.26.14",
     "chokidar-cli": "^2.0.0",
+    "esbuild": "^0.9.2",
     "html-inline": "^1.2.0",
     "html-minifier": "^4.0.0",
     "npm-run-all": "^4.1.5",
-    "rollup": "^2.23.0",
-    "rollup-plugin-terser": "^6.1.0",
-    "terser": "^4.8.0",
+    "terser": "^5.6.1",
     "tinify": "^1.6.0-beta.2"
   },
   "dependencies": {

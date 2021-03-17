@@ -5,6 +5,7 @@ import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
 import { lerp, rand } from './utils';
+import TILESET from '../img/tileset.webp';
 
 
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -67,7 +68,7 @@ const ATLAS = {
   },
 };
 const FRAME_DURATION = 0.1; // duration of 1 animation frame, in seconds
-let tileset = 'DATAURL:src/img/tileset.webp';   // characters sprite, embedded as a base64 encoded dataurl by build script
+let tileset;   // characters sprite, embedded as a base64 encoded dataurl by build script
 
 // LOOP VARIABLES
 
@@ -398,7 +399,7 @@ onload = async (e) => {
   //checkMonetization(unlockExtraContent);
 
   await initCharset(loadImg);
-  tileset = await loadImg(tileset);
+  tileset = await loadImg(TILESET);
   // speak = await initSpeech();
 
   toggleLoop(true);
