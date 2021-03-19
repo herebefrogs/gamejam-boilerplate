@@ -1,6 +1,6 @@
 {
   "name": "gamejam-boilerplate",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Boilerplate for Game Jams like JS13KGames",
   "main": "src/js/game.js",
   "scripts": {
