@@ -16,7 +16,7 @@ npm run build
 
 Assets
 ------
-Even though the game engine is agnostic to the image types used, the build script is configured for WebP (which has better compression than PNGs and is supported by all modern browsers)
+Even though the game engine is agnostic to the type of images used, the build script is configured for WebP (which has better compression than PNGs and is supported by all modern browsers).
 
 
 Understanding the game engine
@@ -54,17 +54,17 @@ Understanding the build script
 ------------------------------
 The build script starts by wiping clean the `dist` directory. That's where the game will be served from during development, and where the game's optimized ZIP will be saved for gamejam submission.
 
-Next, it builds the JS code with `esbuild` & `terser`. `esbuild` will follow all the JS import/require and inline them into a single IIFE. Any unused function will be removed by `esbuild`'s tree-shaking. WebP images will be automatically embedded as Base64-encoded data URLs, reducing the number of files. The resulting code bundle will be piped into `terser` which will then optimize the bundle for size. During development, sourcemaps will be enabled.
+Next, it builds the JS code with `esbuild` & `terser`. Code bundler `esbuild` will follow all the JS import/require and inline them into a single IIFE. Any unused function will be removed by `esbuild`'s tree-shaking. WebP images will be automatically embedded as Base64-encoded data URLs, reducing the number of files. The resulting code will be piped into the `terser` minifier to optimize the bundle for size. During development, sourcemaps will be enabled.
 
 This is where things diverge a bit:
 - During development:
   -  `esbuild` will watch for JS changes and rebuild the JS bundle into the `dist` directory.
-  - `Chodikar` will watch for images changes in the `src` directory and call `esbuild` again (since the new images need to be inlined in the JS bundle).
-  - `BrowserSync` will serve the JS file from the `dist` directory and `index.html` from the `src` directory on localhost over SSL (useful for A-Frame development). Any changes to the `dist` directory or `index.html` will livereload the new version of the game in your browser.
+  - `chodikar` will watch for images changes in the `src` directory and call `esbuild` again (since the new images need to be inlined in the JS bundle).
+  - `browser-sync` will serve the JS file from the `dist` directory and `index.html` from the `src` directory on localhost over HTTPS (useful for A-Frame development). Any changes to the `dist` directory or `index.html` will livereload the new version of the game in your browser.
 - For gamejam submission:
-  - `html-inline` will inline any CSS or JS files referenced by a `src` attribute into `index.html` .
+  - `html-inline` will inline any CSS and JS files referenced by a `src` attribute into `index.html` .
   - `html-minifier` will then optimize the inlined CSS and HTML markup.
-  - At this point, all your game assets are in a single file, `index.html`,which will then be zipped.
+  - At this point, all your game assets are in a single file `index.html`, which will then be zipped.
   - The resulting ZIP is futher optimzed by `AdvZIP` (part of the AdvanceComp suite).
   - Finally, a small report will tell you how big the ZIP is and what's your size budget left if you're participating to JS13KGAMES.
 

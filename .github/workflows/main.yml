@@ -1,0 +1,64 @@
+# This workflow build the latest commit from the main branch
+# and publishes the result to the Github Pages branch
+
+name: CI
+
+# triggers the workflow on push or pull request events for the main branch
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  # workflow contains a single job called "build"
+  build:
+    # type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # sequence of tasks that will be executed as part of the job
+    steps:
+      # input branch
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+
+      # output branch
+      - name: Checkout Github Pages branch
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+          path: gh-pages
+        
+      # setup runtime & dependencies
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build game
+        run: |
+          npm run clean
+          npm run build:js
+          npm run build:html
+          npm run build:zip
+
+      - name: Prepare commit message
+        run: |
+          # capture commit subject and ID
+          git log -1 --format='%s (%H)%n' > commit-msg
+          # capture zip size
+          npm run --silent build:zipSize >> commit-msg
+          # preview commit message
+          cat commit-msg
+
+      - name: Commit game to Github Pages
+        run: |
+          cp dist/index.html gh-pages/
+          cd gh-pages
+          git status
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+          git commit -F ../commit-msg index.html
+          git push
+
