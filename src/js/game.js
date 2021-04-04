@@ -81,6 +81,7 @@ let running = true;
 // GAMEPLAY HANDLERS
 
 function unlockExtraContent() {
+  // NOTE: remember to update the value of the monetization meta tag in src/index.html to your payment pointer
 }
 
 function startGame() {

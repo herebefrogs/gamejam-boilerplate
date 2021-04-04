@@ -14,11 +14,6 @@ npm run build
 -> build game for gamejam submission (no sourcemap and livereload script)
 ```
 
-Assets
-------
-Even though the game engine is agnostic to the type of images used, the build script is configured for WebP (which has better compression than PNGs and is supported by all modern browsers).
-
-
 Understanding the game engine
 -----------------------------
 The entry point of your game is `index.html`. It contains minimal styling, a canvas, and a script tag to load the main JS game file. It's also missing a lot of HTML markup to make it a valid document, but modern browsers will add them automatically, therefore saving some bytes.
@@ -68,6 +63,13 @@ This is where things diverge a bit:
   - The resulting ZIP is futher optimzed by `AdvZIP` (part of the AdvanceComp suite).
   - Finally, a small report will tell you how big the ZIP is and what's your size budget left if you're participating to JS13KGAMES.
 
+Assets
+------
+Even though the game engine is agnostic to the type of images used, the build script is configured for WebP (which has better compression than PNGs and is supported by all modern browsers).
+
+Web Monetization
+----------------
+To enable Web Monetization, uncomment the call to `checkMonetization` in `onload` and enable extra features in `unlockExtraContent`. Remember to update the value of the `monetization` meta tag in `src/index.html` to your payment pointer.`
 
 Special Thanks & Credits
 ------------------------
