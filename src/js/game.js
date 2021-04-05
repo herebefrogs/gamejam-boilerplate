@@ -21,7 +21,7 @@ let screen = TITLE_SCREEN;
 // factor by which to reduce both moveX and moveY when player moving diagonally
 // so they don't seem to move faster than when traveling vertically or horizontally
 const RADIUS_ONE_AT_45_DEG = Math.cos(Math.PI / 4);
-const STEERING_DURATION = 150;                // in millis, duration till going full left or right
+const TIME_TO_FULL_SPEED = 150;                // in millis, duration till going full speed in any direction
 
 let countdown; // in seconds
 let hero;
@@ -252,12 +252,12 @@ function updateHeroInput() {
     hero.moveY = hero.moveUp + hero.moveDown;
   } else {
     if (hero.moveLeft || hero.moveRight) {
-      hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / STEERING_DURATION)
+      hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
     } else {
       hero.moveX = 0;
     }
     if (hero.moveDown || hero.moveUp) {
-      hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / STEERING_DURATION)
+      hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / TIME_TO_FULL_SPEED)
     } else {
       hero.moveY = 0;
     }
