@@ -4,7 +4,7 @@ import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
-import { lerp, rand } from './utils';
+import { lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
 
 
@@ -399,7 +399,7 @@ onload = async (e) => {
   onresize();
   //checkMonetization(unlockExtraContent);
 
-  await initCharset(loadImg);
+  await initCharset();
   tileset = await loadImg(TILESET);
   // speak = await initSpeech();
 
@@ -420,16 +420,6 @@ onresize = onrotate = function() {
 document.onvisibilitychange = function(e) {
   // pause loop and game timer when switching tabs
   toggleLoop(!e.target.hidden);
-};
-
-function loadImg(dataUri) {
-  return new Promise(function(resolve) {
-    var img = new Image();
-    img.onload = function() {
-      resolve(img);
-    };
-    img.src = dataUri;
-  });
 };
 
 // INPUT HANDLERS

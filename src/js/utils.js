@@ -1,3 +1,5 @@
+// PSEUDO RANDOM NUMBER GENERATOR
+
 export function rand(min, max) {
   return Math.floor(Math.random() * (max + 1 - min) + min);
 };
@@ -5,6 +7,8 @@ export function rand(min, max) {
 export function choice(values) {
   return values[rand(0, values.length - 1)];
 };
+
+// LERP
 
 /**
  * Return a value between min and max based on current time in range [0...1]
@@ -46,3 +50,15 @@ export function smoothLerpArray(values, t) {
   const delta = t * (values.length - 1) - start;
   return lerp(min, max, delta);
 }
+
+// IMAGE LOADING
+
+export function loadImg(dataUri) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      resolve(img);
+    };
+    img.src = dataUri;
+  });
+};

@@ -1,3 +1,5 @@
+import { loadImg } from './utils';
+
 // available alphabet (must match characters in the alphabet sprite exactly)
 // U = up arrow
 // D = down arrow
@@ -15,7 +17,7 @@ import CHARSET from '../img/charset.webp';
 export const CHARSET_SIZE = 8; // in px
 let charset;
 
-export const initCharset = async loadImg => {
+export const initCharset = async () => {
   charset = await loadImg(CHARSET);
 }
 
