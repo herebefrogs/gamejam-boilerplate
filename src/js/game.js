@@ -4,7 +4,7 @@ import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
-import { lerp, loadImg } from './utils';
+import { getSeed, initRand, lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
 
 
@@ -399,6 +399,7 @@ onload = async (e) => {
   onresize();
   //checkMonetization(unlockExtraContent);
 
+  // initRand(getSeed());
   await initCharset();
   tileset = await loadImg(TILESET);
   // speak = await initSpeech();
