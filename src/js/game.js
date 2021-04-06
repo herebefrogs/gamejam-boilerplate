@@ -317,10 +317,10 @@ function render() {
 
   switch (screen) {
     case TITLE_SCREEN:
-      renderText('title screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
-      renderText(isMobile ? 'tap to start' : 'press any key', VIEWPORT_CTX, VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
+      renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
+      renderText(isMobile ? 'tap to start' : 'press any key', VIEWPORT.width / 2, VIEWPORT.height / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
-        renderText('konami mode on', VIEWPORT_CTX, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+        renderText('konami mode on', VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
       }
       break;
     case GAME_SCREEN:
@@ -330,14 +330,14 @@ function render() {
         viewportOffsetX, viewportOffsetY, VIEWPORT.width, VIEWPORT.height,
         0, 0, VIEWPORT.width, VIEWPORT.height
       );
-      renderText('game screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
+      renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
       // uncomment to debug mobile input handlers
       // renderDebugTouch();
-      entities.forEach(renderEntity);
+      entities.forEach(entity => renderEntity(entity));
       break;
     case END_SCREEN:
-      renderText('end screen', VIEWPORT_CTX, CHARSET_SIZE, CHARSET_SIZE);
+      renderText('end screen', CHARSET_SIZE, CHARSET_SIZE);
       break;
   }
 
@@ -347,14 +347,14 @@ function render() {
 function renderCountdown() {
   const minutes = Math.floor(Math.ceil(countdown) / 60);
   const seconds = Math.ceil(countdown) - minutes * 60;
-  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, VIEWPORT_CTX, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, VIEWPORT.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
 
 };
 
-function renderEntity(entity) {
+function renderEntity(entity, ctx = VIEWPORT_CTX) {
   const sprite = ATLAS[entity.type][entity.action][entity.frame];
   // TODO skip draw if image outside of visible canvas
-  VIEWPORT_CTX.drawImage(
+  ctx.drawImage(
     tileset,
     sprite.x, sprite.y, sprite.w, sprite.h,
     Math.round(entity.x - viewportOffsetX), Math.round(entity.y - viewportOffsetY), sprite.w, sprite.h
@@ -400,7 +400,7 @@ onload = async (e) => {
   //checkMonetization(unlockExtraContent);
 
   // initRand(getSeed());
-  await initCharset();
+  await initCharset(VIEWPORT_CTX);
   tileset = await loadImg(TILESET);
   // speak = await initSpeech();
 

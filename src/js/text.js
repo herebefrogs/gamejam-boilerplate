@@ -16,8 +16,10 @@ export const ALIGN_RIGHT = 2;
 import CHARSET from '../img/charset.webp';
 export const CHARSET_SIZE = 8; // in px
 let charset;
+let ctx;
 
-export const initCharset = async () => {
+export const initCharset = async (canvasContext) => {
+  ctx = canvasContext;
   charset = await loadImg(CHARSET);
 }
 
@@ -30,7 +32,7 @@ export const initCharset = async () => {
  * @param {*} align 
  * @param {*} scale 
  */
-export function renderText(msg, ctx, x, y, align = ALIGN_LEFT, scale = 1) {
+export function renderText(msg, x, y, align = ALIGN_LEFT, scale = 1) {
   const SCALED_SIZE = scale * CHARSET_SIZE;
   const MSG_WIDTH = msg.length * (SCALED_SIZE + 1) - 1;
   const ALIGN_OFFSET = align === ALIGN_RIGHT ? MSG_WIDTH :
