@@ -4,7 +4,7 @@
 // ZzFX Music's optimized copy of ZzFX by Frank Force https://github.com/KilledByAPixel/ZzFX
 
 // zzfxX - the common audio context
-const zzfxX=new(top.AudioContext||webkitAudioContext);
+const zzfxX=new(window.AudioContext||webkitAudioContext);
 
 // zzfxV - global volume
 const zzfxV=.3
