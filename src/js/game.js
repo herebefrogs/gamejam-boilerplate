@@ -1,5 +1,5 @@
 import { isMobile } from './mobile';
-import { checkMonetization } from './monetization';
+import { checkMonetization, isMonetizationEnabled } from './monetization';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
@@ -86,6 +86,7 @@ function unlockExtraContent() {
 
 function startGame() {
   // setRandSeed(getRandSeed());
+  // if (isMonetizationEnabled()) { unlockExtraContent() }
   konamiIndex = 0;
   countdown = 60;
   viewportOffsetX = viewportOffsetY = 0;
@@ -339,6 +340,7 @@ function render() {
       break;
     case END_SCREEN:
       renderText('end screen', CHARSET_SIZE, CHARSET_SIZE);
+      // renderText(monetizationEarned(), TEXT.width - CHARSET_SIZE, TEXT.height - 2*CHARSET_SIZE, ALIGN_RIGHT);
       break;
   }
 
@@ -398,7 +400,7 @@ onload = async (e) => {
   document.title = 'Game Jam Boilerplate';
 
   onresize();
-  //checkMonetization(unlockExtraContent);
+  //checkMonetization();
 
   await initCharset(VIEWPORT_CTX);
   tileset = await loadImg(TILESET);
