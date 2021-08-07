@@ -4,7 +4,7 @@ import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
-import { getSeed, initRand, lerp, loadImg } from './utils';
+import { getRandSeed, setRandSeed, lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
 
 
@@ -85,6 +85,7 @@ function unlockExtraContent() {
 }
 
 function startGame() {
+  // setRandSeed(getRandSeed());
   konamiIndex = 0;
   countdown = 60;
   viewportOffsetX = viewportOffsetY = 0;
@@ -399,7 +400,6 @@ onload = async (e) => {
   onresize();
   //checkMonetization(unlockExtraContent);
 
-  // initRand(getSeed());
   await initCharset(VIEWPORT_CTX);
   tileset = await loadImg(TILESET);
   // speak = await initSpeech();

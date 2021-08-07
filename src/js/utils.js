@@ -4,28 +4,22 @@
 // NOTE: default to non-deterministic Math.random() in case initRand() doesn't get called
 let prng = Math.random;
 
-// initialize a new deterninistic PRNG from the provided seed
-export function initRand(seed) {
+// initialize a new deterninistic PRNG from the provided seed and store the seed in the URL
+export function setRandSeed(seed) {
   prng = seedRand(seed);
+
+  // save seed in URL
+  const url = new URL(location);
+  url.searchParams.set('seed', seed);
+  history.pushState({}, '', url);
 }
 
-// return a seed value retrieved from the URL (if present) or generated
-// (if missing or asked to change, storing the new value in the URL for future use)
-export function getSeed(changeSeed = false) {
+// return a seed value retrieved from the URL (if present) or generated (if missing or asked to change)
+export function getRandSeed(changeSeed = false) {
   // attempt to read seed from URL
   let seed = new URLSearchParams(location.search).get('seed');
 
-  // is seed missing or explicitely asked to regenerate a new one?
-  if (!seed || changeSeed) {
-    seed = createRandSeed();
-
-    // save seed in URL
-    const url = new URL(location);
-    url.searchParams.set('seed', seed);
-    history.pushState({}, '', url);
-  }
-
-  return seed;
+  return (!seed || changeSeed) ? createRandSeed() : seed;
 }
 
 /**
