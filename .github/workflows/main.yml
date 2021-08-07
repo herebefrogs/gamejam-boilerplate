@@ -62,3 +62,12 @@ jobs:
           git commit -F ../commit-msg index.html
           git push
 
+#      - name: Publish game to Itch.io via Butler
+#        uses: josephbmanley/butler-publish-itchio-action@master
+#        env:
+#          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+#          CHANNEL: html
+#          ITCH_GAME: <your itch game name here>
+#          ITCH_USER: <your username here>
+#          PACKAGE: dist/index.htm
+
