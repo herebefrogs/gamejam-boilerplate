@@ -416,6 +416,9 @@ onresize = onrotate = function() {
   c.height = VIEWPORT.height * scaleToFit;
   // disable smoothing on image scaling
   CTX.imageSmoothingEnabled = MAP_CTX.imageSmoothingEnabled = VIEWPORT_CTX.imageSmoothingEnabled = false;
+
+  // fix key events not received on itch.io when game loads in full screen
+  window.focus();
 };
 
 // UTILS
