@@ -28,7 +28,7 @@ The main game loop is handled by the `loop` function and does 4 things:
 - calculate the elapsed time since the last loop
 - update the current game state via the `update` function.
 
-Both `render` and `update` use a state machine approach to do different things depending which screen the game is on. This boilerplate comes with 3 screens that you're encourage to expand to your needs:
+Both `render` and `update` use a state machine approach to do different things depending which screen the game is on. This boilerplate comes with 3 screens which you're encourage to extend to your needs:
 - `TITLE_SCREEN`: display the name of your game, some credits or control instructions
 - `GAME_SCREEN`: when the player actually plays your game
 - `END_SCREEN`: display score and restart the game once the game is won or lost
@@ -47,7 +47,7 @@ The boilerplate will recognize the Konami code on the title screen. You're then 
 
 Understanding the build script
 ------------------------------
-The build script starts by wiping clean the `dist` directory. That's where the game will be served from during development, and where the game's optimized ZIP will be saved for gamejam submission.
+The build script starts by wiping clean the `dist` directory. That's where it will serve the game from during development, and where it will save the game's optimized ZIP for gamejam submission.
 
 Next, it builds the JS code with `esbuild` & `terser`. Code bundler `esbuild` will follow all the JS import/require and inline them into a single IIFE. Any unused function will be removed by `esbuild`'s tree-shaking. WebP images will be automatically embedded as Base64-encoded data URLs, reducing the number of files. The resulting code will be piped into the `terser` minifier to optimize the bundle for size. During development, sourcemaps will be enabled.
 
@@ -69,7 +69,7 @@ Even though the game engine is agnostic to the type of images used, the build sc
 
 Web Monetization
 ----------------
-To enable Web Monetization, uncomment the call to `checkMonetization` in `onload` and enable extra features in `unlockExtraContent`. Remember to update the value of the `monetization` meta tag in `src/index.html` to your payment pointer.`
+To enable Web Monetization, uncomment the call to `checkMonetization` in `onload`. This will add listeners to handle monetization events. At the appropriate time in your code, check `isMonetizationEnabled` to decide if extra features should be accessible or not. Remember to update the value of the `monetization` meta tag in `src/index.html` to your payment pointer.
 
 Special Thanks & Credits
 ------------------------

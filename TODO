@@ -1,3 +1,5 @@
+- add CCapture.js for recording in-progress movies during development
+
 game engine
 ===========
 - lerp-smoothing?
@@ -10,6 +12,8 @@ build chain
 custom:
 - replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
 libs:
-- ECT (https://github.com/fhanau/Efficient-Compression-Tool) in place of AdvZip? no Homebrew build for Mac :(
+- ECT (https://github.com/fhanau/Efficient-Compression-Tool) in place of AdvZip?
+  - Mac build https://github.com/fhanau/Efficient-Compression-Tool/releases/download/v0.8.3/ect-0.8.3-macOS.zip (need manual install & permission shenanigans)
+  - npm package https://www.npmjs.com/package/ect-bin (but didn't seem to be available in command line afterwards... postinstall failed?)
 - avif in place of png/webp (not enough browser support yet)
 
