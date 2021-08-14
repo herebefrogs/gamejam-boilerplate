@@ -375,10 +375,10 @@ function renderMap() {
 function loop() {
   if (running) {
     requestId = requestAnimationFrame(loop);
-    render();
-    currentTime = Date.now();
+    currentTime = performance.now();
     elapsedTime = (currentTime - lastTime) / 1000;
     update();
+    render();
     lastTime = currentTime;
   }
 };
@@ -386,7 +386,7 @@ function loop() {
 function toggleLoop(value) {
   running = value;
   if (running) {
-    lastTime = Date.now();
+    lastTime = performance.now();
     loop();
   } else {
     cancelAnimationFrame(requestId);
