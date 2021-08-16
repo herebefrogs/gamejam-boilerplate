@@ -73,7 +73,7 @@ export function randInt(min = 0, max = 1) {
 };
 
 export function choice(values) {
-  return values[rand(0, values.length - 1)];
+  return values[randInt(0, values.length - 1)];
 };
 
 // LERP
