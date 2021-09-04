@@ -12,7 +12,7 @@
     "build:zipSize": "node scripts/zipSize.js",
     "start": "npm-run-all -s clean -p dev:*",
     "dev:js": "esbuild src/js/game.js --bundle --format=iife --loader:.webp=dataurl --sourcemap --outfile=dist/game.js --watch",
-    "dev:serve_watch_html_js": "browser-sync 'dist' 'src' --watch --host 0.0.0.0 --https",
+    "dev:serve_watch_html_js": "browser-sync dist src --watch --host 0.0.0.0 --https",
     "dev:watch_img": "chokidar src/img -d 0 -c 'npm run dev:js'"
   },
   "license": "MIT",
