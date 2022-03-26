@@ -6,6 +6,7 @@ import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
 import { getRandSeed, setRandSeed, lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
+import { share } from './share';
 
 
 const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
@@ -516,7 +517,11 @@ onkeyup = function(e) {
     case END_SCREEN:
       switch (e.code) {
         case 'KeyT':
-          open(`https://twitter.com/intent/tweet?text=viral%20marketing%20message%20https%3A%2F%2Fgoo.gl%2F${'some tiny Google url here'}`, '_blank');
+          share({
+            title: document.title,
+            text: 'Check this game template made by @herebefrogs',
+            url: 'https://bit.ly/gmjblp'
+          });
           break;
         default:
           screen = TITLE_SCREEN;
