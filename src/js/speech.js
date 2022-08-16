@@ -1,6 +1,6 @@
 import { choice } from './utils';
 
-// index utterances by message so they can be reused
+// cache utterances by message so they can be reused
 const utterances = {};
 
 // voices are loaded asynchronously, but the API doesn't return a promise

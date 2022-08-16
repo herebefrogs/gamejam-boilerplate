@@ -396,8 +396,8 @@ function toggleLoop(value) {
 
 // EVENT HANDLERS
 
+// the real "main" of the game
 onload = async (e) => {
-  // the real "main" of the game
   document.title = 'Game Jam Boilerplate';
 
   onresize();
