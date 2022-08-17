@@ -1,4 +1,5 @@
 import { isMobile } from './mobile';
+import { isAnyKeyDown, isKeyDown, isKeyUp } from './inputs/keyboard';
 import { checkMonetization, isMonetizationEnabled } from './monetization';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
@@ -9,7 +10,7 @@ import TILESET from '../img/tileset.webp';
 import { share } from './share';
 
 
-const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
 let konamiIndex = 0;
 
 // GAMEPLAY VARIABLES
@@ -89,7 +90,7 @@ function startGame() {
   // setRandSeed(getRandSeed());
   // if (isMonetizationEnabled()) { unlockExtraContent() }
   konamiIndex = 0;
-  countdown = 60;
+  countdown = 10;
   viewportOffsetX = viewportOffsetY = 0;
   hero = createEntity('hero', VIEWPORT.width / 2, VIEWPORT.height / 2);
   entities = [
@@ -282,7 +283,54 @@ function updateEntity(entity) {
   entity.y += distance * entity.moveY;
 };
 
+function processInputs() {
+  switch (screen) {
+    case TITLE_SCREEN:
+      if (isKeyUp(konamiCode[konamiIndex])) {
+        konamiIndex++;
+      }
+      if (isAnyKeyDown()) {
+        startGame();
+      }
+      break;
+    case GAME_SCREEN:
+      hero.moveLeft = Math.max(
+        isKeyDown('ArrowLeft'),
+        isKeyDown('KeyA'),   // English Keyboard layout
+        isKeyDown('KeyQ'),   // French keyboard layout
+      );
+      hero.moveRight = Math.max(
+        isKeyDown('ArrowRight'),
+        isKeyDown('KeyD'),
+      );
+      hero.moveUp = Math.max(
+        isKeyDown('ArrowUp'),
+        isKeyDown('KeyW'),   // English Keyboard layout
+        isKeyDown('KeyZ'),   // French keyboard layout
+      );
+      hero.moveDown = Math.max(
+        isKeyDown('ArrowDown'),
+        isKeyDown('KeyS'),
+      );
+      break;
+    case END_SCREEN:
+      if (isKeyUp('KeyT')) {
+        share({
+          title: document.title,
+          text: 'Check this game template made by @herebefrogs',
+          url: 'https://bit.ly/gmjblp'
+        });
+      }
+      if (isAnyKeyDown()) {
+        screen = TITLE_SCREEN;
+      }
+      break;
+  }
+}
+
 function update() {
+  processInputs();
+
   switch (screen) {
     case GAME_SCREEN:
       countdown -= elapsedTime;
@@ -429,107 +477,12 @@ document.onvisibilitychange = function(e) {
   toggleLoop(!e.target.hidden);
 };
 
-// INPUT HANDLERS
-
-onkeydown = function(e) {
-  // prevent itch.io from scrolling the page up/down
-  e.preventDefault();
-
-  if (!e.repeat) {
-    switch (screen) {
-      case GAME_SCREEN:
-        switch (e.code) {
-          case 'ArrowLeft':
-          case 'KeyA':
-          case 'KeyQ':  // French keyboard support
-            hero.moveLeft = currentTime;
-            break;
-          case 'ArrowUp':
-          case 'KeyW':
-          case 'KeyZ':  // French keyboard support
-            hero.moveUp = currentTime;
-            break;
-          case 'ArrowRight':
-          case 'KeyD':
-            hero.moveRight = currentTime;
-            break;
-          case 'ArrowDown':
-          case 'KeyS':
-            hero.moveDown = currentTime;
-            break;
-          case 'KeyP':
-            // Pause game as soon as key is pressed
-            toggleLoop(!running);
-            break;
-        }
-        break;
-    }
+addEventListener('keydown', e => {
+  if (!e.repeat && screen === GAME_SCREEN && e.code === 'KeyP') {
+    // Pause game as soon as key is pressed
+    toggleLoop(!running);
   }
-};
-
-onkeyup = function(e) {
-  switch (screen) {
-    case TITLE_SCREEN:
-      if (e.which !== konamiCode[konamiIndex] || konamiIndex === konamiCode.length) {
-        startGame();
-      } else {
-        konamiIndex++;
-      }
-      break;
-    case GAME_SCREEN:
-      switch (e.code) {
-        case 'ArrowLeft':
-        case 'KeyA':
-        case 'KeyQ': // French keyboard support
-          if (hero.moveRight) {
-            // reversing right while hero moving left
-            hero.moveRight = currentTime;
-          }
-          hero.moveLeft = 0;
-          break;
-        case 'ArrowRight':
-        case 'KeyD':
-          if (hero.moveLeft) {
-            // reversing left while hero moving right
-            hero.moveLeft = currentTime;
-          }
-          hero.moveRight = 0;
-          break;
-        case 'ArrowUp':
-        case 'KeyW':
-        case 'KeyZ': // French keyboard support
-          if (hero.moveDown) {
-            // reversing down while hero moving up
-            hero.moveDown = currentTime;
-          }
-          hero.moveUp = 0;
-          break;
-        case 'ArrowDown':
-        case 'KeyS':
-          if (hero.moveUp) {
-            // reversing up while hero moving down
-            hero.moveUp = currentTime;
-          }
-          hero.moveDown = 0;
-          break;
-        }
-      break;
-    case END_SCREEN:
-      switch (e.code) {
-        case 'KeyT':
-          share({
-            title: document.title,
-            text: 'Check this game template made by @herebefrogs',
-            url: 'https://bit.ly/gmjblp'
-          });
-          break;
-        default:
-          screen = TITLE_SCREEN;
-          break;
-      }
-      break;
-  }
-};
+})
 
 // MOBILE INPUT HANDLERS
 
