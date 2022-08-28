@@ -1,5 +1,5 @@
 import { isMobile } from './mobile';
-import { isAnyKeyDown, isKeyDown, isKeyUp } from './inputs/keyboard';
+import { areKeyDown, isAnyKeyDown, isKeyDown, isKeyUp } from './inputs/keyboard';
 import { checkMonetization, isMonetizationEnabled } from './monetization';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
@@ -294,24 +294,24 @@ function processInputs() {
       }
       break;
     case GAME_SCREEN:
-      hero.moveLeft = Math.max(
-        isKeyDown('ArrowLeft'),
-        isKeyDown('KeyA'),   // English Keyboard layout
-        isKeyDown('KeyQ'),   // French keyboard layout
-      );
-      hero.moveRight = Math.max(
-        isKeyDown('ArrowRight'),
-        isKeyDown('KeyD'),
-      );
-      hero.moveUp = Math.max(
-        isKeyDown('ArrowUp'),
-        isKeyDown('KeyW'),   // English Keyboard layout
-        isKeyDown('KeyZ'),   // French keyboard layout
-      );
-      hero.moveDown = Math.max(
-        isKeyDown('ArrowDown'),
-        isKeyDown('KeyS'),
-      );
+      hero.moveLeft = areKeyDown([
+        'ArrowLeft',
+        'KeyA',   // English Keyboard layout
+        'KeyQ'    // French keyboard layout
+      ]);
+      hero.moveRight = areKeyDown([
+        'ArrowRight',
+        'KeyD'
+      ]);
+      hero.moveUp = areKeyDown([
+        'ArrowUp',
+        'KeyW',   // English Keyboard layout
+        'KeyZ'    // French keyboard layout
+      ]);
+      hero.moveDown = areKeyDown([
+        'ArrowDown',
+        'KeyS'
+      ]);
       break;
     case END_SCREEN:
       if (isKeyUp('KeyT')) {

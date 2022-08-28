@@ -21,6 +21,7 @@ game engine
 build chain
 ===========
 custom:
+- replace all const by var before JS gets inlined in HTML
 - replace all the global variables by arguments with default value of the IIFE (e.g. const foo = 'bar' => (foo = 'bar') => { ... })
 libs:
 - ECT (https://github.com/fhanau/Efficient-Compression-Tool) in place of AdvZip?
