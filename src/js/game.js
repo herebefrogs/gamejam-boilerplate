@@ -1,13 +1,14 @@
-import { isMobile } from './mobile';
 import { areKeyDown, isAnyKeyDown, isKeyDown, isKeyUp } from './inputs/keyboard';
+import { isPointerDown, isPointerUp, pointerDirection } from './inputs/pointer';
+import { isMobile } from './mobile';
 import { checkMonetization, isMonetizationEnabled } from './monetization';
+import { share } from './share';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
 import { getRandSeed, setRandSeed, lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
-import { share } from './share';
 
 
 const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
@@ -90,7 +91,7 @@ function startGame() {
   // setRandSeed(getRandSeed());
   // if (isMonetizationEnabled()) { unlockExtraContent() }
   konamiIndex = 0;
-  countdown = 10;
+  countdown = 60;
   viewportOffsetX = viewportOffsetY = 0;
   hero = createEntity('hero', VIEWPORT.width / 2, VIEWPORT.height / 2);
   entities = [
@@ -249,25 +250,6 @@ function createEntity(type, x = 0, y = 0) {
   };
 };
 
-function updateHeroInput() {
-  // TODO can touch & desktop be handled the same way?
-  if (isTouch) {
-    hero.moveX = hero.moveLeft + hero.moveRight;
-    hero.moveY = hero.moveUp + hero.moveDown;
-  } else {
-    if (hero.moveLeft || hero.moveRight) {
-      hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
-    } else {
-      hero.moveX = 0;
-    }
-    if (hero.moveDown || hero.moveUp) {
-      hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / TIME_TO_FULL_SPEED)
-    } else {
-      hero.moveY = 0;
-    }
-  }
-}
-
 function updateEntity(entity) {
   // update animation frame
   entity.frameTime += elapsedTime;
@@ -289,29 +271,44 @@ function processInputs() {
       if (isKeyUp(konamiCode[konamiIndex])) {
         konamiIndex++;
       }
-      if (isAnyKeyDown()) {
+      if (isAnyKeyDown() || isPointerUp()) {
         startGame();
       }
       break;
     case GAME_SCREEN:
-      hero.moveLeft = areKeyDown([
-        'ArrowLeft',
-        'KeyA',   // English Keyboard layout
-        'KeyQ'    // French keyboard layout
-      ]);
-      hero.moveRight = areKeyDown([
-        'ArrowRight',
-        'KeyD'
-      ]);
-      hero.moveUp = areKeyDown([
-        'ArrowUp',
-        'KeyW',   // English Keyboard layout
-        'KeyZ'    // French keyboard layout
-      ]);
-      hero.moveDown = areKeyDown([
-        'ArrowDown',
-        'KeyS'
-      ]);
+      if (isPointerDown()) {
+        [hero.moveX, hero.moveY] = pointerDirection();
+      } else {
+        hero.moveLeft = areKeyDown([
+          'ArrowLeft',
+          'KeyA',   // English Keyboard layout
+          'KeyQ'    // French keyboard layout
+        ]);
+        hero.moveRight = areKeyDown([
+          'ArrowRight',
+          'KeyD'
+        ]);
+        hero.moveUp = areKeyDown([
+          'ArrowUp',
+          'KeyW',   // English Keyboard layout
+          'KeyZ'    // French keyboard layout
+        ]);
+        hero.moveDown = areKeyDown([
+          'ArrowDown',
+          'KeyS'
+        ]);
+
+        if (hero.moveLeft || hero.moveRight) {
+          hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
+        } else {
+          hero.moveX = 0;
+        }
+        if (hero.moveDown || hero.moveUp) {
+          hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / TIME_TO_FULL_SPEED)
+        } else {
+          hero.moveY = 0;
+        }
+      }
       break;
     case END_SCREEN:
       if (isKeyUp('KeyT')) {
@@ -321,7 +318,7 @@ function processInputs() {
           url: 'https://bit.ly/gmjblp'
         });
       }
-      if (isAnyKeyDown()) {
+      if (isAnyKeyDown() || isPointerUp()) {
         screen = TITLE_SCREEN;
       }
       break;
@@ -337,7 +334,6 @@ function update() {
       if (countdown < 0) {
         screen = END_SCREEN;
       }
-      updateHeroInput();
       entities.forEach(updateEntity);
       entities.slice(1).forEach((entity) => {
         const test = testAABBCollision(hero, entity);
@@ -484,152 +480,3 @@ addEventListener('keydown', e => {
   }
 })
 
-// MOBILE INPUT HANDLERS
-
-let minX = 0;
-let minY = 0;
-let maxX = 0;
-let maxY = 0;
-let MIN_DISTANCE = 30; // in px
-let touches = [];
-let isTouch = false;
-
-// adding onmousedown/move/up triggers a MouseEvent and a PointerEvent
-// on platform that support both (duplicate event, pointer > mouse || touch)
-ontouchstart = onpointerdown = function(e) {
-  e.preventDefault();
-  switch (screen) {
-    case GAME_SCREEN:
-      isTouch = true;
-      [maxX, maxY] = [minX, minY] = pointerLocation(e);
-      break;
-  }
-};
-
-ontouchmove = onpointermove = function(e) {
-  e.preventDefault();
-  switch (screen) {
-    case GAME_SCREEN:
-      if (minX && minY) {
-        setTouchPosition(pointerLocation(e));
-      }
-      break;
-  }
-}
-
-ontouchend = onpointerup = function(e) {
-  e.preventDefault();
-  switch (screen) {
-    case TITLE_SCREEN:
-      startGame();
-      break;
-    case GAME_SCREEN:
-      isTouch = false;
-      // stop hero
-      hero.moveLeft = hero.moveRight = hero.moveDown = hero.moveUp = 0;
-      // end touch
-      minX = minY = maxX = maxY = 0;
-      break;
-    case END_SCREEN:
-      screen = TITLE_SCREEN;
-      break;
-  }
-};
-
-// utilities
-function pointerLocation(e) {
-  return [e.pageX || e.changedTouches[0].pageX, e.pageY || e.changedTouches[0].pageY];
-};
-
-function setTouchPosition([x, y]) {
-  // touch moving further right
-  if (x > maxX) {
-    maxX = x;
-    hero.moveRight = lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
-  }
-  // touch moving further left
-  else if (x < minX) {
-    minX = x;
-    hero.moveLeft = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
-  }
-  // touch reversing left while hero moving right
-  else if (x < maxX && hero.moveX >= 0) {
-    minX = x;
-    hero.moveRight = 0;
-  }
-  // touch reversing right while hero moving left
-  else if (minX < x && hero.moveX <= 0) {
-    maxX = x;
-    hero.moveLeft = 0;
-  }
-
-  // touch moving further down
-  if (y > maxY) {
-    maxY = y;
-    hero.moveDown = lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
-
-  }
-  // touch moving further up
-  else if (y < minY) {
-    minY = y;
-    hero.moveUp = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
-
-  }
-  // touch reversing up while hero moving down
-  else if (y < maxY && hero.moveY >= 0) {
-    minY = y;
-    hero.moveDown = 0;
-  }
-  // touch reversing down while hero moving up
-  else if (minY < y && hero.moveY <= 0) {
-    maxY = y;
-    hero.moveUp = 0;
-  }
-
-  // uncomment to debug mobile input handlers
-  // addDebugTouch(x, y);
-};
-
-function addDebugTouch(x, y) {
-  touches.push([x / innerWidth * VIEWPORT.width, y / innerHeight * VIEWPORT.height]);
-  if (touches.length > 10) {
-    touches = touches.slice(touches.length - 10);
-  }
-};
-
-function renderDebugTouch() {
-  let x = maxX / innerWidth * VIEWPORT.width;
-  let y = maxY / innerHeight * VIEWPORT.height;
-  renderDebugTouchBound(x, x, 0, VIEWPORT.height, '#f00');
-  renderDebugTouchBound(0, VIEWPORT.width, y, y, '#f00');
-  x = minX / innerWidth * VIEWPORT.width;
-  y = minY / innerHeight * VIEWPORT.height;
-  renderDebugTouchBound(x, x, 0, VIEWPORT.height, '#ff0');
-  renderDebugTouchBound(0, VIEWPORT.width, y, y, '#ff0');
-
-  if (touches.length) {
-    VIEWPORT_CTX.strokeStyle = VIEWPORT_CTX.fillStyle =   '#02d';
-    VIEWPORT_CTX.beginPath();
-    [x, y] = touches[0];
-    VIEWPORT_CTX.moveTo(x, y);
-    touches.forEach(function([x, y]) {
-      VIEWPORT_CTX.lineTo(x, y);
-    });
-    VIEWPORT_CTX.stroke();
-    VIEWPORT_CTX.closePath();
-    VIEWPORT_CTX.beginPath();
-    [x, y] = touches[touches.length - 1];
-    VIEWPORT_CTX.arc(x, y, 2, 0, 2 * Math.PI)
-    VIEWPORT_CTX.fill();
-    VIEWPORT_CTX.closePath();
-  }
-};
-
-function renderDebugTouchBound(_minX, _maxX, _minY, _maxY, color) {
-  VIEWPORT_CTX.strokeStyle = color;
-  VIEWPORT_CTX.beginPath();
-  VIEWPORT_CTX.moveTo(_minX, _minY);
-  VIEWPORT_CTX.lineTo(_maxX, _maxY);
-  VIEWPORT_CTX.stroke();
-  VIEWPORT_CTX.closePath();
-};

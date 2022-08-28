@@ -76,6 +76,8 @@ export function choice(values) {
   return values[randInt(0, values.length - 1)];
 };
 
+export const clamp = (v, min, max) => Math.max(min, Math.min(v, max));
+
 // LERP
 
 /**
