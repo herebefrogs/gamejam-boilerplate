@@ -1,5 +1,8 @@
 /** Pointer events
- * Record pointer location and click time
+ * Record pointer location and click times.
+ *
+ * Note: importing any public function of this module
+ * will install the keyboard event listeners
  */
 
 import { clamp, lerp } from '../utils';
@@ -67,7 +70,6 @@ function setTouchVector() {
     minX = x;
     vX = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
   }
-  // TODO are these edge case important now?
   // pointer reversing left while moving right before
   else if (x < maxX && vX >= 0) {
     minX = x;
@@ -91,7 +93,6 @@ function setTouchVector() {
     vY = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
 
   }
-  // TODO edge case still important?
   // pointer reversing up while moving down before
   else if (y < maxY && vY >= 0) {
     minY = y;

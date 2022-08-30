@@ -1,4 +1,4 @@
-import { areKeyDown, isAnyKeyDown, isKeyDown, isKeyUp } from './inputs/keyboard';
+import { isKeyDown, anyKeyDown, isKeyUp } from './inputs/keyboard';
 import { isPointerDown, isPointerUp, pointerDirection } from './inputs/pointer';
 import { isMobile } from './mobile';
 import { checkMonetization, isMonetizationEnabled } from './monetization';
@@ -271,7 +271,7 @@ function processInputs() {
       if (isKeyUp(konamiCode[konamiIndex])) {
         konamiIndex++;
       }
-      if (isAnyKeyDown() || isPointerUp()) {
+      if (anyKeyDown() || isPointerUp()) {
         startGame();
       }
       break;
@@ -279,24 +279,24 @@ function processInputs() {
       if (isPointerDown()) {
         [hero.moveX, hero.moveY] = pointerDirection();
       } else {
-        hero.moveLeft = areKeyDown([
+        hero.moveLeft = isKeyDown(
           'ArrowLeft',
           'KeyA',   // English Keyboard layout
           'KeyQ'    // French keyboard layout
-        ]);
-        hero.moveRight = areKeyDown([
+        );
+        hero.moveRight = isKeyDown(
           'ArrowRight',
           'KeyD'
-        ]);
-        hero.moveUp = areKeyDown([
+        );
+        hero.moveUp = isKeyDown(
           'ArrowUp',
           'KeyW',   // English Keyboard layout
           'KeyZ'    // French keyboard layout
-        ]);
-        hero.moveDown = areKeyDown([
+        );
+        hero.moveDown = isKeyDown(
           'ArrowDown',
           'KeyS'
-        ]);
+        );
 
         if (hero.moveLeft || hero.moveRight) {
           hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
@@ -318,7 +318,7 @@ function processInputs() {
           url: 'https://bit.ly/gmjblp'
         });
       }
-      if (isAnyKeyDown() || isPointerUp()) {
+      if (anyKeyDown() || isPointerUp()) {
         screen = TITLE_SCREEN;
       }
       break;

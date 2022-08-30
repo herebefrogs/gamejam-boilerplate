@@ -3,16 +3,9 @@
 game engine
 ===========
 - improved inputs
-  - keyboard, gamepad and pointer lib
-    - all they should do is record when keys/buttons/tap positions are pressed, and when that happened
-    - game should have a dedicated utility deciding the order of input sources
-      and/or how they are blended together into player inputs.
-    - update/ECS gets player input from utility and ECS take over the rest, for best decoupling
-    - odd scenarios
-      - pausing the game on P key press
-      - toggling game screens
-          game loop logic doesn't belong in input lib, does the lib emits an event, or trigger special callbacks?
-
+  - keyboard: double key press
+  - pointer: double click
+  - gamepad
 - lerp-smoothing?
 - gamepad support?
 - tinyfont.js? https://github.com/darkwebdev/tinyfont.js
