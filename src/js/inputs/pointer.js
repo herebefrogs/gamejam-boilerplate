@@ -25,41 +25,48 @@ let maxY = 0;
 let MIN_DISTANCE = 30;
 // click time
 let pointerDownTime = 0;
+// last pointer event (for canvas space calculations)
+let lastEvent;
 
 // NOTE:
-// - pointer events are universal (mouse, touch, pen
-// - if necessary distinguish multi-touch or multiple pens with e.pointerID
+// - pointer events are universal (mouse, touch, pen)
+// - if necessary distinguish multi-touch or multiple pens with e.pointerId
 // - listening for mouse events would double pointer events
 // - listening touch events only work for mobile and would not capture mouse events
 addEventListener('pointerdown', e => {
   e.preventDefault();
+  lastEvent = e;
 
   pointerDownTime = performance.now();
-  [x, y] = [maxX, maxY] = [minX, minY] = pointerLocation(e);
+  [x, y] = [maxX, maxY] = [minX, minY] = pointerLocation();
 });
 
 addEventListener('pointermove', e => {
   e.preventDefault();
+  lastEvent = e;
 
-  // TODO there might be cases where we want the pointer position
-  // despite no touch happening (think mouse moving but no click)
-  // should I get rid of the if?
+  [x, y] = pointerLocation();
+
   if (pointerDownTime) {
-    [x, y] = pointerLocation(e)
-    setTouchVector();
+    setPointerDirection();
   }
 });
 
 addEventListener('pointerup', e => {
   e.preventDefault();
+  lastEvent = e;
 
   pointerDownTime = 0;
-  x = y = vX = vY = minX = minY = maxX = maxY = 0;
+  vX = vY = minX = minY = maxX = maxY = 0;
 });
 
-const pointerLocation = e => [e.pageX, e.pageY];
+// for multiple pointers, use e.pointerId to differentiate (on desktop, mouse is always 1, on mobile every pointer even has a different id incrementing by 1)
+// for surface area of touch contact, use e.width and e.height (in CSS pixel) mutiplied by window.devicePixelRatio (for device pixels aka canvas pixels)
+// for canvas space coordinate, use e.layerX and .layerY when e.target = c
+// { id: e.pointerId, x: e.x, y: e.y, w: e.width*window.devicePixelRatio, h: e.height*window.devicePixelRatio}
+const pointerLocation = () => [Math.floor(lastEvent.pageX), Math.floor(lastEvent.pageY)];
 
-function setTouchVector() {
+function setPointerDirection() {
   // touch moving further right
   if (x > maxX) {
     maxX = x;
@@ -123,6 +130,30 @@ export const canvasPointerPosition = () => {
   return [
     clamp(x - canvasX, 0, c.width),
     clamp(y - canvasY, 0, c.height)
+  ];
+
+  const pointerInCanvas = lastEvent.target === c;
+
+  if (pointerInCanvas) {
+    // touch/click happened on canvas, layerX/layerY are already in canvas space
+    return [
+      Math.round(lastEvent.layerX / c.scaleToFit),
+      Math.round(lastEvent.layerY / c.scaleToFit)
+    ];
+  }
+
+  // touch/click happened outside of canvas (which is centered horizontally)
+  // x/pageX/y/pageY are in screen space, must be offset by canvas position then scaled down
+  // to be converted in canvas space
+  return [
+    clamp(
+      Math.round(((lastEvent.x || lastEvent.pageX) - (innerWidth - c.width)/2) / c.scaleToFit),
+      0, c.width / c.scaleToFit
+    ),
+    clamp(
+      Math.round((lastEvent.y || lastEvent.pageY) / c.scaleToFit),
+      0, c.height / c.scaleToFit
+    )
   ];
 }
 

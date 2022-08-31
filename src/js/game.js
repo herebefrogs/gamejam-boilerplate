@@ -456,9 +456,11 @@ onload = async (e) => {
 
 onresize = onrotate = function() {
   // scale canvas to fit screen while maintaining aspect ratio
-  const scaleToFit = Math.min(innerWidth / VIEWPORT.width, innerHeight / VIEWPORT.height);
-  c.width = VIEWPORT.width * scaleToFit;
-  c.height = VIEWPORT.height * scaleToFit;
+  // NOTE: it's dirty to shove the scaling ratio on the canvas, but the pointer events need it for canvas coordinate calculations
+  c.scaleToFit = Math.min(innerWidth / VIEWPORT.width, innerHeight / VIEWPORT.height);
+  c.width = VIEWPORT.width * c.scaleToFit;
+  c.height = VIEWPORT.height * c.scaleToFit;
+
   // disable smoothing on image scaling
   CTX.imageSmoothingEnabled = MAP_CTX.imageSmoothingEnabled = VIEWPORT_CTX.imageSmoothingEnabled = false;
 
