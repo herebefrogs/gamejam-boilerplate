@@ -9,7 +9,7 @@ import { clamp, lerp } from '../utils';
 
 /* private */
 
-// on screen position of pointer
+// screen position of pointer
 let x = 0;
 let y = 0;
 // vector/direction of pointer motion, in range [-1, 1];
@@ -119,42 +119,22 @@ export const isPointerDown = () => pointerDownTime;
 
 export const isPointerUp = () => isPointerDown() ? pointerDownTime = 0 || true : false;
 
-export const screenPointerPosition = () => [x, y];
+export const pointerScreenPosition = () => [x, y];
 
-export const canvasPointerPosition = () => {
-  // implicit window.inner... c is canvas ID "magic"
-  // TODO could this be cached? (but how to refresh when changed?)
-  const canvasX = Math.floor((innerWidth - c.width) / 2);
-  const canvasY = Math.floor((innerHeight - c.height) / 2);
-
-  return [
-    clamp(x - canvasX, 0, c.width),
-    clamp(y - canvasY, 0, c.height)
-  ];
-
-  const pointerInCanvas = lastEvent.target === c;
-
-  if (pointerInCanvas) {
-    // touch/click happened on canvas, layerX/layerY are already in canvas space
-    return [
-      Math.round(lastEvent.layerX / c.scaleToFit),
-      Math.round(lastEvent.layerY / c.scaleToFit)
-    ];
-  }
-
-  // touch/click happened outside of canvas (which is centered horizontally)
+export const pointerCanvasPosition = (canvasWidth, canvasHeight) => {
+  // canvas is centered horizontally
   // x/pageX/y/pageY are in screen space, must be offset by canvas position then scaled down
   // to be converted in canvas space
   return [
     clamp(
-      Math.round(((lastEvent.x || lastEvent.pageX) - (innerWidth - c.width)/2) / c.scaleToFit),
-      0, c.width / c.scaleToFit
+      (lastEvent.x || lastEvent.pageX) - (innerWidth - canvasWidth)/2,
+      0, canvasWidth
     ),
     clamp(
-      Math.round((lastEvent.y || lastEvent.pageY) / c.scaleToFit),
-      0, c.height / c.scaleToFit
+     lastEvent.y || lastEvent.pageY,
+      0, canvasHeight
     )
-  ];
+  ].map(Math.round);
 }
 
 export const pointerDirection = () => [vX, vY];
