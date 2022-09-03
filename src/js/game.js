@@ -21,7 +21,7 @@ const GAME_SCREEN = 1;
 const END_SCREEN = 2;
 let screen = TITLE_SCREEN;
 
-// factor by which to reduce both moveX and moveY when player moving diagonally
+// factor by which to reduce both velX and velY when player moving diagonally
 // so they don't seem to move faster than when traveling vertically or horizontally
 const RADIUS_ONE_AT_45_DEG = Math.cos(Math.PI / 4);
 const TIME_TO_FULL_SPEED = 150;                // in millis, duration till going full speed in any direction
@@ -144,7 +144,7 @@ function correctAABBCollision(entity1, entity2, test) {
   // because just pushing along one axis by the distance overlapped)
 
   // entity1 moving down/right
-  if (entity1.moveX > 0 && entity1.moveY > 0) {
+  if (entity1.velX > 0 && entity1.velY > 0) {
     if (deltaMaxX < deltaMaxY) {
       // collided right side first
       entity1.x -= deltaMaxX;
@@ -154,7 +154,7 @@ function correctAABBCollision(entity1, entity2, test) {
     }
   }
   // entity1 moving up/right
-  else if (entity1.moveX > 0 && entity1.moveY < 0) {
+  else if (entity1.velX > 0 && entity1.velY < 0) {
     if (deltaMaxX < deltaMinY) {
       // collided right side first
       entity1.x -= deltaMaxX;
@@ -164,11 +164,11 @@ function correctAABBCollision(entity1, entity2, test) {
     }
   }
   // entity1 moving right
-  else if (entity1.moveX > 0) {
+  else if (entity1.velX > 0) {
     entity1.x -= deltaMaxX;
   }
   // entity1 moving down/left
-  else if (entity1.moveX < 0 && entity1.moveY > 0) {
+  else if (entity1.velX < 0 && entity1.velY > 0) {
     if (deltaMinX < deltaMaxY) {
       // collided left side first
       entity1.x += deltaMinX;
@@ -178,7 +178,7 @@ function correctAABBCollision(entity1, entity2, test) {
     }
   }
   // entity1 moving up/left
-  else if (entity1.moveX < 0 && entity1.moveY < 0) {
+  else if (entity1.velX < 0 && entity1.velY < 0) {
     if (deltaMinX < deltaMinY) {
       // collided left side first
       entity1.x += deltaMinX;
@@ -188,15 +188,15 @@ function correctAABBCollision(entity1, entity2, test) {
     }
   }
   // entity1 moving left
-  else if (entity1.moveX < 0) {
+  else if (entity1.velX < 0) {
     entity1.x += deltaMinX;
   }
   // entity1 moving down
-  else if (entity1.moveY > 0) {
+  else if (entity1.velY > 0) {
     entity1.y -= deltaMaxY;
   }
   // entity1 moving up
-  else if (entity1.moveY < 0) {
+  else if (entity1.velY < 0) {
     entity1.y += deltaMinY;
   }
 };
@@ -245,7 +245,7 @@ function velocityForTarget(srcX, srcY, destX, destY) {
   // [
   //  velX = cos(alpha),
   //  velY = sin(alpha),
-  //  alpha
+  //  alpha (TODO is zero at the top?)
   // ]
   return [
     adjacent / hypotenuse,
@@ -266,8 +266,8 @@ function createEntity(type, x = 0, y = 0) {
     moveLeft: 0,
     moveRight: 0,
     moveUp: 0,
-    moveX: 0,
-    moveY: 0,
+    velX: 0,
+    velY: 0,
     speed: ATLAS[type].speed,
     type,
     w: sprite.w,
@@ -285,10 +285,10 @@ function updateEntity(entity) {
     entity.frame %= ATLAS[entity.type][entity.action].length;
   }
   // update position
-  const scale = entity.moveX && entity.moveY ? RADIUS_ONE_AT_45_DEG : 1;
+  const scale = entity.velX && entity.velY ? RADIUS_ONE_AT_45_DEG : 1;
   const distance = entity.speed * elapsedTime * scale;
-  entity.x += distance * entity.moveX;
-  entity.y += distance * entity.moveY;
+  entity.x += distance * entity.velX;
+  entity.y += distance * entity.velY;
 };
 
 const pointerMapPosition = () => {
@@ -308,7 +308,7 @@ function processInputs() {
       break;
     case GAME_SCREEN:
       if (isPointerDown()) {
-        [hero.moveX, hero.moveY] = pointerDirection();
+        [hero.velX, hero.velY] = pointerDirection();
       } else {
         hero.moveLeft = isKeyDown(
           'ArrowLeft',
@@ -330,19 +330,20 @@ function processInputs() {
         );
 
         if (hero.moveLeft || hero.moveRight) {
-          hero.moveX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
+          hero.velX = (hero.moveLeft > hero.moveRight ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveLeft, hero.moveRight)) / TIME_TO_FULL_SPEED)
         } else {
-          hero.moveX = 0;
+          hero.velX = 0;
         }
         if (hero.moveDown || hero.moveUp) {
-          hero.moveY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / TIME_TO_FULL_SPEED)
+          hero.velY = (hero.moveUp > hero.moveDown ? -1 : 1) * lerp(0, 1, (currentTime - Math.max(hero.moveUp, hero.moveDown)) / TIME_TO_FULL_SPEED)
         } else {
-          hero.moveY = 0;
+          hero.velY = 0;
         }
       }
       break;
     case END_SCREEN:
       if (isKeyUp('KeyT')) {
+        // TODO can I share an image of the game?
         share({
           title: document.title,
           text: 'Check this game template made by @herebefrogs',
