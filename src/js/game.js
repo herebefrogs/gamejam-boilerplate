@@ -254,6 +254,14 @@ function velocityForTarget(srcX, srcY, destX, destY) {
   ];
 }
 
+// TODO move to utils (or dedicated utils package)
+function positionOnCircle(centerX, centerY, radius, angle) {
+  return [
+    centerX + radius * Math.cos(angle),
+    centerY + radius * Math.sin(angle)
+  ];
+}
+
 function createEntity(type, x = 0, y = 0) {
   const action = 'move';
   const sprite = ATLAS[type][action][0];
