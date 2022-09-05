@@ -6,7 +6,7 @@ import { share } from './share';
 import { loadSongs, playSound, playSong } from './sound';
 import { initSpeech } from './speech';
 import { save, load } from './storage';
-import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText } from './text';
+import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText, initTextBuffer, clearTextBuffer, renderAnimatedText } from './text';
 import { getRandSeed, setRandSeed, lerp, loadImg } from './utils';
 import TILESET from '../img/tileset.webp';
 
@@ -34,16 +34,6 @@ let speak;
 
 // RENDER VARIABLES
 
-const CTX = c.getContext('2d');         // visible canvas
-const MAP = c.cloneNode();              // full map rendered off screen
-const MAP_CTX = MAP.getContext('2d');
-MAP.width = 640;                        // map size
-MAP.height = 480;
-const BUFFER = c.cloneNode();           // backbuffer
-const BUFFER_CTX = BUFFER.getContext('2d');
-BUFFER.width = 640;                     // backbuffer size, same as map
-BUFFER.height = 480;
-
 let cameraX = 0;                        // camera/viewport position in map
 let cameraY = 0;
 const CAMERA_WIDTH = 320;               // camera/viewport size
@@ -53,6 +43,17 @@ const CAMERA_WINDOW_X = 100;
 const CAMERA_WINDOW_Y = 50;
 const CAMERA_WINDOW_WIDTH = CAMERA_WIDTH - 2*CAMERA_WINDOW_X;
 const CAMERA_WINDOW_HEIGHT = CAMERA_HEIGHT - 2*CAMERA_WINDOW_Y;
+
+const CTX = c.getContext('2d');         // visible canvas
+const BUFFER = c.cloneNode();           // backbuffer
+const BUFFER_CTX = BUFFER.getContext('2d');
+BUFFER.width = 640;                     // backbuffer size
+BUFFER.height = 480;
+const MAP = c.cloneNode();              // static elements of the map/world cached once
+const MAP_CTX = MAP.getContext('2d');
+MAP.width = 640;                        // map size, same as backbuffer
+MAP.height = 480;
+const TEXT = initTextBuffer(c, CAMERA_WIDTH, CAMERA_HEIGHT);  // text buffer
 
 
 const ATLAS = {
@@ -396,15 +397,20 @@ function blit() {
     cameraX, cameraY, CAMERA_WIDTH, CAMERA_HEIGHT,
     0, 0, c.width, c.height
   );
+  CTX.drawImage(
+    TEXT,
+    0, 0, CAMERA_WIDTH, CAMERA_HEIGHT,
+    0, 0, c.width, c.height
+  );
 };
 
 function render() {
-  BUFFER_CTX.fillStyle = '#fff';
-  BUFFER_CTX.fillRect(0, 0, BUFFER.width, BUFFER.height);
+  clearTextBuffer();
 
   switch (screen) {
     case TITLE_SCREEN:
-      // should use Camera Width instead of Buffer now that buffer is the whole map
+      BUFFER_CTX.fillStyle = '#fff';
+      BUFFER_CTX.fillRect(0, 0, BUFFER.width, BUFFER.height);
       renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
       renderText(isMobile ? 'tap to start' : 'press any key', CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
@@ -415,16 +421,18 @@ function render() {
       // clear backbuffer by drawing static map elements
       // TODO could also just draw the camera visible portion of the map
       BUFFER_CTX.drawImage(MAP, 0, 0, BUFFER.width, BUFFER.height);
-      renderText('game screen', cameraX + CHARSET_SIZE, cameraY + CHARSET_SIZE);
       // TODO could also skip every entity not in the camera visible portion
       entities.forEach(entity => renderEntity(entity));
+      renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
       // debugCameraWindow();
       // uncomment to debug mobile input handlers
       // renderDebugTouch();
       break;
     case END_SCREEN:
-      renderText('end screen', cameraX + CHARSET_SIZE, cameraY + CHARSET_SIZE);
+      BUFFER_CTX.fillStyle = '#fff';
+      BUFFER_CTX.fillRect(0, 0, BUFFER.width, BUFFER.height);
+      renderText('end screen', CHARSET_SIZE, CHARSET_SIZE);
       // renderText(monetizationEarned(), TEXT.width - CHARSET_SIZE, TEXT.height - 2*CHARSET_SIZE, ALIGN_RIGHT);
       break;
   }
@@ -435,7 +443,7 @@ function render() {
 function renderCountdown() {
   const minutes = Math.floor(Math.ceil(countdown) / 60);
   const seconds = Math.ceil(countdown) - minutes * 60;
-  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, cameraX + CAMERA_WIDTH - CHARSET_SIZE, cameraY + CHARSET_SIZE, ALIGN_RIGHT);
+  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, CAMERA_WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
 
 };
 
@@ -493,7 +501,7 @@ onload = async (e) => {
   onresize();
   //checkMonetization();
 
-  await initCharset(BUFFER_CTX);
+  await initCharset();
   tileset = await loadImg(TILESET);
   // speak = await initSpeech();
 
