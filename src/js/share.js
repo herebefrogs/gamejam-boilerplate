@@ -15,6 +15,6 @@ export const share = async (data) => {
     }
   } else {
     // twitter only
-    open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(data.text)}%20${encodeURIComponent(data.url)}`, '_blank');
+    open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(data.text)}&url=${encodeURIComponent(data.url)}`, '_blank');
   }
 }
