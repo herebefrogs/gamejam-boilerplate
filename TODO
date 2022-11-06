@@ -2,14 +2,27 @@
 
 game engine
 ===========
+- text rendering shouldn't go on an overlay by default  
 - improved inputs
   - keyboard: double key press
   - pointer: double click
+    - classic D-PAD behaviour (need a name for my current implementation)
+    - classic D-PAD rendering (ala Remi overlay circle/range with smaller overlay circle/pad)
   - gamepad
 - lerp-smoothing?
-- gamepad support?
 - tinyfont.js? https://github.com/darkwebdev/tinyfont.js
 - support multiple voices for speech synthesis?
+- ECS
+  - rectangle class for bounding box and quick AABB collision logic
+    - useful for camera window & player, camera window & off screen entities
+  - System base class
+  - Component base class
+    - inputs
+    - velocity
+    - position
+    - shape
+      - display list/nested shape/skeleton animation
+  - Entity base class
 
 build chain
 ===========
