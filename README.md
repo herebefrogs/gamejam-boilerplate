@@ -18,7 +18,7 @@ Understanding the game engine
 -----------------------------
 The entry point of your game is `index.html`. It contains minimal styling, a canvas, and a script tag to load the main JS game file. It's also missing a lot of HTML markup to make it a valid document, but modern browsers will add them automatically, therefore saving some bytes.
 
-The first JS function to trigger is the `onload` even handler. It will set the document's title to your game's name, scale the canvas up to fill out the full window while preserving its aspect ratio, load the character set image (bitmap alphabet) and tile set image (all the game sprites), then fire off the main game loop with the `toggleLoop` function.
+The first JS function to trigger is the `onload` event handler. It will set the document's title to your game's name, scale the canvas up to fill out the full window while preserving its aspect ratio, load the character set image (bitmap alphabet) and tile set image (all the game sprites), then fire off the main game loop with the `toggleLoop` function.
 
 The canvas size is controlled by the 2 global variables `WIDTH` and `HEIGHT`. Change them to increase the game map and/or game resolution.
 
@@ -41,7 +41,7 @@ The `render` function goes through every entity and will display the proper bitm
 The game is automatically paused if the player change browser tab (`onvisibilitychange` event handler).
 
 Keyboard control is achieved by the `onkeydown` and `onkeyup` event handlers, which only record the direction in which the player wants to move so as no to block the event thread.
-Mouse and touchscreen support is achieved by the `ontouchstart/onpointerdown`, `ontouchmove/onpointermove` and `ontouchend/onpointerup` even handlers.
+Mouse and touchscreen support is achieved by the `ontouchstart/onpointerdown`, `ontouchmove/onpointermove` and `ontouchend/onpointerup` event handlers.
 
 The boilerplate will recognize the Konami code on the title screen. You're then free to enable any behaviour or cheat you see fit.
 
