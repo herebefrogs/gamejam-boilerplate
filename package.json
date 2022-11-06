@@ -28,7 +28,7 @@
     "tinify": "^1.6.0-beta.2"
   },
   "dependencies": {
-    "npm": "^7.20.6"
+    "npm": "^8.19.3"
   },
   "repository": {
     "type": "git",
