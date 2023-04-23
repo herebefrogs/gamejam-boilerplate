@@ -18,7 +18,7 @@
   "license": "MIT",
   "devDependencies": {
     "advzip-bin": "^2.0.0",
-    "browser-sync": "^2.27.7",
+    "browser-sync": "^2.29.1",
     "chokidar-cli": "^3.0.0",
     "esbuild": "^0.9.2",
     "html-inline": "^1.2.0",
