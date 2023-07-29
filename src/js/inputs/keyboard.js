@@ -33,7 +33,7 @@ addEventListener('keyup', e => _releaseKey(e.code));
 
 /* public API */
 
-// returns the most recent key pressed amongt the array passed as argument (or 0 if none were)
+// returns the most recent key pressed amongst the array passed as argument (or 0 if none were)
 export const isKeyDown = (...codes) => Math.max(...codes.map(code => _isKeyDown(code)))
 
 // retuns the list of keys currently pressed

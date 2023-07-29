@@ -23,7 +23,7 @@ let screen = TITLE_SCREEN;
 
 // factor by which to reduce both velX and velY when player moving diagonally
 // so they don't seem to move faster than when traveling vertically or horizontally
-const RADIUS_ONE_AT_45_DEG = Math.cos(Math.PI / 4);
+const NORMALIZE_DIAGONAL = Math.cos(Math.PI / 4);
 const TIME_TO_FULL_SPEED = 150;                // in millis, duration till going full speed in any direction
 
 let countdown; // in seconds
@@ -240,7 +240,7 @@ function updateCameraWindow() {
 
 // TODO move to utils (or dedicated utils package)
 function velocityForTarget(srcX, srcY, destX, destY) {
-  const hypotenuse = Math.sqrt(Math.pow(destX - srcX, 2) + Math.pow(destY - srcY, 2))
+  const hypotenuse = Math.hypot(destX - srcX, destY - srcY)
   const adjacent = destX - srcX;
   const opposite = destY - srcY;
   // [
@@ -294,7 +294,7 @@ function updateEntity(entity) {
     entity.frame %= ATLAS[entity.type][entity.action].length;
   }
   // update position
-  const scale = entity.velX && entity.velY ? RADIUS_ONE_AT_45_DEG : 1;
+  const scale = entity.velX && entity.velY ? NORMALIZE_DIAGONAL : 1;
   const distance = entity.speed * elapsedTime * scale;
   entity.x += distance * entity.velX;
   entity.y += distance * entity.velY;
@@ -441,10 +441,9 @@ function render() {
 };
 
 function renderCountdown() {
-  const minutes = Math.floor(Math.ceil(countdown) / 60);
-  const seconds = Math.ceil(countdown) - minutes * 60;
+  const minutes = ((countdown + 1) / 60) | 0;  // | 0 is the same as Math.trunc to get the integer part
+  const seconds = (countdown + 1 - minutes * 60) | 0; // +1 to round up to the next second e.g. 2.7s is still 3s left until 2.0s
   renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, CAMERA_WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
-
 };
 
 function renderEntity(entity, ctx = BUFFER_CTX) {
