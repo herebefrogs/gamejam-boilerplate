@@ -1,3 +1,9 @@
+scratchpad:
+- lots of x,y also have a corresponding w,h. That could be captured in a rect(x,y,w,h) structure
+  - ala https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+  - with some convenience methods for x1,y1 in rect? and rect1 intersect with rect?
+
+
 - add CCapture.js for recording in-progress movies during development
 
 game engine
@@ -23,6 +29,7 @@ game engine
     - shape
       - display list/nested shape/skeleton animation
   - Entity base class
+  - UI widgets for game menus
 
 build chain
 ===========
