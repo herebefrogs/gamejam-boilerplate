@@ -112,16 +112,16 @@ function startGame() {
 
 function testAABBCollision(entity1, entity2) {
   const test = {
-    entity1MaxX: entity1.x + entity1.w,
-    entity1MaxY: entity1.y + entity1.h,
-    entity2MaxX: entity2.x + entity2.w,
-    entity2MaxY: entity2.y + entity2.h,
+    entity1MaxX: entity1.box.right,
+    entity1MaxY: entity1.box.bottom,
+    entity2MaxX: entity2.box.right,
+    entity2MaxY: entity2.box.bottom,
   };
 
-  test.collide = entity1.x < test.entity2MaxX
-    && test.entity1MaxX > entity2.x
-    && entity1.y < test.entity2MaxY
-    && test.entity1MaxY > entity2.y;
+  test.collide = entity1.box.x < test.entity2MaxX
+    && test.entity1MaxX > entity2.box.x
+    && entity1.box.y < test.entity2MaxY
+    && test.entity1MaxY > entity2.box.y;
 
   return test;
 };
@@ -130,10 +130,10 @@ function testAABBCollision(entity1, entity2) {
 function correctAABBCollision(entity1, entity2, test) {
   const { entity1MaxX, entity1MaxY, entity2MaxX, entity2MaxY } = test;
 
-  const deltaMaxX = entity1MaxX - entity2.x;
-  const deltaMaxY = entity1MaxY - entity2.y;
-  const deltaMinX = entity2MaxX - entity1.x;
-  const deltaMinY = entity2MaxY - entity1.y;
+  const deltaMaxX = entity1MaxX - entity2.box.x;
+  const deltaMaxY = entity1MaxY - entity2.box.y;
+  const deltaMinX = entity2MaxX - entity1.box.x;
+  const deltaMinY = entity2MaxY - entity1.box.y;
 
   // AABB collision response (homegrown wall sliding, not physically correct
   // because just pushing along one axis by the distance overlapped)
@@ -142,87 +142,87 @@ function correctAABBCollision(entity1, entity2, test) {
   if (entity1.velX > 0 && entity1.velY > 0) {
     if (deltaMaxX < deltaMaxY) {
       // collided right side first
-      entity1.x -= deltaMaxX;
+      entity1.box.x -= deltaMaxX;
     } else {
       // collided top side first
-      entity1.y -= deltaMaxY;
+      entity1.box.y -= deltaMaxY;
     }
   }
   // entity1 moving up/right
   else if (entity1.velX > 0 && entity1.velY < 0) {
     if (deltaMaxX < deltaMinY) {
       // collided right side first
-      entity1.x -= deltaMaxX;
+      entity1.box.x -= deltaMaxX;
     } else {
       // collided bottom side first
-      entity1.y += deltaMinY;
+      entity1.box.y += deltaMinY;
     }
   }
   // entity1 moving right
   else if (entity1.velX > 0) {
-    entity1.x -= deltaMaxX;
+    entity1.box.x -= deltaMaxX;
   }
   // entity1 moving down/left
   else if (entity1.velX < 0 && entity1.velY > 0) {
     if (deltaMinX < deltaMaxY) {
       // collided left side first
-      entity1.x += deltaMinX;
+      entity1.box.x += deltaMinX;
     } else {
       // collided top side first
-      entity1.y -= deltaMaxY;
+      entity1.box.y -= deltaMaxY;
     }
   }
   // entity1 moving up/left
   else if (entity1.velX < 0 && entity1.velY < 0) {
     if (deltaMinX < deltaMinY) {
       // collided left side first
-      entity1.x += deltaMinX;
+      entity1.box.x += deltaMinX;
     } else {
       // collided bottom side first
-      entity1.y += deltaMinY;
+      entity1.box.y += deltaMinY;
     }
   }
   // entity1 moving left
   else if (entity1.velX < 0) {
-    entity1.x += deltaMinX;
+    entity1.box.x += deltaMinX;
   }
   // entity1 moving down
   else if (entity1.velY > 0) {
-    entity1.y -= deltaMaxY;
+    entity1.box.y -= deltaMaxY;
   }
   // entity1 moving up
   else if (entity1.velY < 0) {
-    entity1.y += deltaMinY;
+    entity1.box.y += deltaMinY;
   }
 };
 
 function constrainToViewport(entity) {
-  if (entity.x < 0) {
-    entity.x = 0;
-  } else if (entity.x > MAP.width - entity.w) {
-    entity.x = MAP.width - entity.w;
+  if (entity.box.x < 0) {
+    entity.box.x = 0;
+  } else if (entity.box.x > MAP.width - entity.box.width) {
+    entity.box.x = MAP.width - entity.box.width;
   }
-  if (entity.y < 0) {
-    entity.y = 0;
-  } else if (entity.y > MAP.height - entity.h) {
-    entity.y = MAP.height - entity.h;
+  if (entity.box.y < 0) {
+    entity.box.y = 0;
+  } else if (entity.box.y > MAP.height - entity.box.height) {
+    entity.box.y = MAP.height - entity.box.height;
   }
 };
 
 
 function updateCameraWindow() {
   // edge-snapping
-  if (0 < CAMERA.x && hero.x < CAMERA.x + CAMERA_WINDOW.x) {
-    CAMERA.x = Math.max(0, hero.x - CAMERA_WINDOW.x);
+  if (0 < CAMERA.x && hero.box.x < CAMERA.x + CAMERA_WINDOW.x) {
+    CAMERA.x = Math.max(0, hero.box.x - CAMERA_WINDOW.x);
   }
-  else if (CAMERA.x + CAMERA_WINDOW.right < MAP.width && hero.x + hero.w > CAMERA.x + CAMERA_WINDOW.right) {
-    CAMERA.x = Math.min(MAP.width - CAMERA.width, hero.x + hero.w - CAMERA_WINDOW.right);
+  else if (CAMERA.x + CAMERA_WINDOW.right < MAP.width && hero.box.right > CAMERA.x + CAMERA_WINDOW.right) {
+    CAMERA.x = Math.min(MAP.width - CAMERA.width, hero.box.right - CAMERA_WINDOW.right);
   }
   if (0 < CAMERA.y && hero.y < CAMERA.y + CAMERA_WINDOW.y) {
     CAMERA.y = Math.max(0, hero.y - CAMERA_WINDOW.y);
   }
-  else if (CAMERA.y + CAMERA_WINDOW.bottom < MAP.height && hero.y + hero.h > CAMERA.y + CAMERA_WINDOW.bottom) {
-    CAMERA.y = Math.min(MAP.height - CAMERA.height, hero.y + hero.h - CAMERA_WINDOW.bottom);
+  else if (CAMERA.y + CAMERA_WINDOW.bottom < MAP.height && hero.box.bottom > CAMERA.y + CAMERA_WINDOW.bottom) {
+    CAMERA.y = Math.min(MAP.height - CAMERA.height, hero.box.bottom - CAMERA_WINDOW.bottom);
   }
 };
 
@@ -256,9 +256,9 @@ function createEntity(type, x = 0, y = 0) {
   const sprite = ATLAS[type][action][0];
   return {
     action,
+    box: rect(x, y, sprite.w, sprite.h),
     frame: 0,
     frameTime: 0,
-    h: sprite.h,
     moveDown: 0,
     moveLeft: 0,
     moveRight: 0,
@@ -267,9 +267,6 @@ function createEntity(type, x = 0, y = 0) {
     velY: 0,
     speed: ATLAS[type].speed,
     type,
-    w: sprite.w,
-    x,
-    y,
   };
 };
 
@@ -284,8 +281,8 @@ function updateEntity(entity) {
   // update position
   const scale = entity.velX && entity.velY ? NORMALIZE_DIAGONAL : 1;
   const distance = entity.speed * elapsedTime * scale;
-  entity.x += distance * entity.velX;
-  entity.y += distance * entity.velY;
+  entity.box.x += distance * entity.velX;
+  entity.box.y += distance * entity.velY;
 };
 
 const pointerMapPosition = () => {
@@ -365,9 +362,9 @@ function update() {
       }
       entities.forEach(updateEntity);
       entities.slice(1).forEach((entity) => {
-        const test = testAABBCollision(hero, entity);
-        if (test.collide) {
-          correctAABBCollision(hero, entity, test);
+        if (hero.box.intersects(entity.box)) {
+          // TODO remove dependency on testAABBCollision in correctAABBCollision
+          correctAABBCollision(hero, entity, testAABBCollision(hero, entity))
         }
       });
       constrainToViewport(hero);
@@ -443,7 +440,7 @@ function renderEntity(entity, ctx = BUFFER_CTX) {
   ctx.drawImage(
     tileset,
     sprite.x, sprite.y, sprite.w, sprite.h,
-    Math.round(entity.x), Math.round(entity.y), sprite.w, sprite.h
+    Math.round(entity.box.x), Math.round(entity.box.y), sprite.w, sprite.h
   );
 };
 
