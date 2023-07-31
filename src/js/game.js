@@ -8,6 +8,7 @@ import { initSpeech } from './speech';
 import { save, load } from './storage';
 import { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, CHARSET_SIZE, initCharset, renderText, initTextBuffer, clearTextBuffer, renderAnimatedText } from './text';
 import { getRandSeed, setRandSeed, lerp, loadImg } from './utils';
+import { rect } from './utils/dim';
 import TILESET from '../img/tileset.webp';
 
 
@@ -34,15 +35,8 @@ let speak;
 
 // RENDER VARIABLES
 
-let cameraX = 0;                        // camera/viewport position in map
-let cameraY = 0;
-const CAMERA_WIDTH = 320;               // camera/viewport size
-const CAMERA_HEIGHT = 240;
-// camera-window & edge-snapping settings
-const CAMERA_WINDOW_X = 100;
-const CAMERA_WINDOW_Y = 50;
-const CAMERA_WINDOW_WIDTH = CAMERA_WIDTH - 2*CAMERA_WINDOW_X;
-const CAMERA_WINDOW_HEIGHT = CAMERA_HEIGHT - 2*CAMERA_WINDOW_Y;
+const CAMERA = rect(0, 0, 320, 240);      // camera/viewport position relative to map/world
+const CAMERA_WINDOW = rect(100, 50, CAMERA.width - 2*100, CAMERA.height - 2*50); // camera-window & edge-snapping settings, position relative to camera
 
 const CTX = c.getContext('2d');         // visible canvas
 const BUFFER = c.cloneNode();           // backbuffer
@@ -53,7 +47,7 @@ const MAP = c.cloneNode();              // static elements of the map/world cach
 const MAP_CTX = MAP.getContext('2d');
 MAP.width = 640;                        // map size, same as backbuffer
 MAP.height = 480;
-const TEXT = initTextBuffer(c, CAMERA_WIDTH, CAMERA_HEIGHT);  // text buffer
+const TEXT = initTextBuffer(c, CAMERA.width, CAMERA.height);  // text buffer
 
 
 const ATLAS = {
@@ -96,8 +90,8 @@ function startGame() {
   // if (isMonetizationEnabled()) { unlockExtraContent() }
   konamiIndex = 0;
   countdown = 60;
-  cameraX = cameraY = 0;
-  hero = createEntity('hero', CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2);
+  CAMERA.x = CAMERA.y = 0;
+  hero = createEntity('hero', CAMERA.width / 2, CAMERA.height / 2);
   entities = [
     hero,
     createEntity('foe', 10, 10),
@@ -217,24 +211,18 @@ function constrainToViewport(entity) {
 
 
 function updateCameraWindow() {
-  // TODO try to simplify the formulae below with this variable so it's easier to visualize
-  // const cameraEdgeLeftX = cameraX + CAMERA_WINDOW_X;
-  // const cameraEdgeTopY = cameraY + CAMERA_WINDOW_Y;
-  // const cameraEdgeRightX = cameraEdgeLeftX + CAMERA_WINDOW_WIDTH;
-  // const cameraEdgeBottomY = cameraEdgeTopY + CAMERA_WINDOW_HEIGHT;
-
-  // edge snapping
-  if (0 < cameraX && hero.x < cameraX + CAMERA_WINDOW_X) {
-    cameraX = Math.max(0, hero.x - CAMERA_WINDOW_X);
+  // edge-snapping
+  if (0 < CAMERA.x && hero.x < CAMERA.x + CAMERA_WINDOW.x) {
+    CAMERA.x = Math.max(0, hero.x - CAMERA_WINDOW.x);
   }
-  else if (cameraX + CAMERA_WINDOW_X + CAMERA_WINDOW_WIDTH < MAP.width && hero.x + hero.w > cameraX + CAMERA_WINDOW_X + CAMERA_WINDOW_WIDTH) {
-    cameraX = Math.min(MAP.width - CAMERA_WIDTH, hero.x + hero.w - (CAMERA_WINDOW_X + CAMERA_WINDOW_WIDTH));
+  else if (CAMERA.x + CAMERA_WINDOW.right < MAP.width && hero.x + hero.w > CAMERA.x + CAMERA_WINDOW.right) {
+    CAMERA.x = Math.min(MAP.width - CAMERA.width, hero.x + hero.w - CAMERA_WINDOW.right);
   }
-  if (0 < cameraY && hero.y < cameraY + CAMERA_WINDOW_Y) {
-    cameraY = Math.max(0, hero.y - CAMERA_WINDOW_Y);
+  if (0 < CAMERA.y && hero.y < CAMERA.y + CAMERA_WINDOW.y) {
+    CAMERA.y = Math.max(0, hero.y - CAMERA_WINDOW.y);
   }
-  else if (cameraY + CAMERA_WINDOW_Y + CAMERA_WINDOW_HEIGHT < MAP.height && hero.y + hero.h > cameraY + CAMERA_WINDOW_Y + CAMERA_WINDOW_HEIGHT) {
-    cameraY = Math.min(MAP.height - CAMERA_HEIGHT, hero.y + hero.h - (CAMERA_WINDOW_Y + CAMERA_WINDOW_HEIGHT));
+  else if (CAMERA.y + CAMERA_WINDOW.bottom < MAP.height && hero.y + hero.h > CAMERA.y + CAMERA_WINDOW.bottom) {
+    CAMERA.y = Math.min(MAP.height - CAMERA.height, hero.y + hero.h - CAMERA_WINDOW.bottom);
   }
 };
 
@@ -302,7 +290,7 @@ function updateEntity(entity) {
 
 const pointerMapPosition = () => {
   const [x, y] = pointerCanvasPosition(c.width, c.height);
-  return [x*CAMERA_WIDTH/c.width + cameraX, y*CAMERA_HEIGHT/c.height + cameraY].map(Math.round);
+  return [x*CAMERA.width/c.width + CAMERA.x, y*CAMERA.height/c.height + CAMERA.y].map(Math.round);
 }
 
 function processInputs() {
@@ -394,12 +382,13 @@ function blit() {
   // copy camera portion of the backbuffer onto visible canvas, scaling it to screen dimensions
   CTX.drawImage(
     BUFFER,
-    cameraX, cameraY, CAMERA_WIDTH, CAMERA_HEIGHT,
+    CAMERA.x, CAMERA.y, CAMERA.width, CAMERA.height,
     0, 0, c.width, c.height
   );
+  // overlay text canvas on visible canvas
   CTX.drawImage(
     TEXT,
-    0, 0, CAMERA_WIDTH, CAMERA_HEIGHT,
+    0, 0, CAMERA.width, CAMERA.height,
     0, 0, c.width, c.height
   );
 };
@@ -412,8 +401,9 @@ function render() {
       BUFFER_CTX.fillStyle = '#fff';
       BUFFER_CTX.fillRect(0, 0, BUFFER.width, BUFFER.height);
       renderText('title screen', CHARSET_SIZE, CHARSET_SIZE);
-      renderText(isMobile ? 'tap to start' : 'press any key', CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2, ALIGN_CENTER);
+      renderText(isMobile ? 'tap to start' : 'press any key', CAMERA.width / 2, CAMERA.height / 2, ALIGN_CENTER);
       if (konamiIndex === konamiCode.length) {
+        // TODO should be CAMERA.width rather than BUFFER.width since text is on a separate canvas as wide as the camera
         renderText('konami mode on', BUFFER.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
       }
       break;
@@ -422,6 +412,7 @@ function render() {
       // TODO could also just draw the camera visible portion of the map
       BUFFER_CTX.drawImage(MAP, 0, 0, BUFFER.width, BUFFER.height);
       // TODO could also skip every entity not in the camera visible portion
+      // when each entity position and size is a rect with camera.intersects(entity.box)
       entities.forEach(entity => renderEntity(entity));
       renderText('game screen', CHARSET_SIZE, CHARSET_SIZE);
       renderCountdown();
@@ -443,7 +434,7 @@ function render() {
 function renderCountdown() {
   const minutes = ((countdown + 1) / 60) | 0;  // | 0 is the same as Math.trunc to get the integer part
   const seconds = (countdown + 1 - minutes * 60) | 0; // +1 to round up to the next second e.g. 2.7s is still 3s left until 2.0s
-  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, CAMERA_WIDTH - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
+  renderText(`${minutes}:${seconds <= 9 ? '0' : ''}${seconds}`, CAMERA.width - CHARSET_SIZE, CHARSET_SIZE, ALIGN_RIGHT);
 };
 
 function renderEntity(entity, ctx = BUFFER_CTX) {
@@ -459,7 +450,7 @@ function renderEntity(entity, ctx = BUFFER_CTX) {
 function debugCameraWindow() {
   BUFFER_CTX.strokeStyle = '#d00';
   BUFFER_CTX.lineWidth = 1;
-  BUFFER_CTX.strokeRect(cameraX + CAMERA_WINDOW_X, cameraY + CAMERA_WINDOW_Y, CAMERA_WINDOW_WIDTH, CAMERA_WINDOW_HEIGHT);
+  BUFFER_CTX.strokeRect(CAMERA.x + CAMERA_WINDOW.x, CAMERA.y + CAMERA_WINDOW.y, CAMERA_WINDOW.width, CAMERA_WINDOW.width);
 };
 
 function renderMap() {

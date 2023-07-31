@@ -17,12 +17,12 @@ import CHARSET from '../img/charset.webp';
 export const CHARSET_SIZE = 8; // in px
 const TEXT_SPEED = 500;        // milliseconds per character
 let charset;
-let textCanvas;
+let canvas;
 let ctx;
 
 /**
  * Load charset spritesheet and initialize the text canvas at the specified size
- * @param {Canvas} canvas main canvas to clone
+ * @param {Canvas} canvasToClone main canvas to clone
  * @param {int} w
  * @param {int} h
  * @return the text canvas so it can be blipped
@@ -31,19 +31,19 @@ export const initCharset = async () => {
   charset = await loadImg(CHARSET);
 }
 
-export const initTextBuffer = (canvas, w, h) => {
-  textCanvas = canvas.cloneNode();
-  textCanvas.width = w;
-  textCanvas.heigh = h;
+export const initTextBuffer = (canvasToClone, w, h) => {
+  canvas = canvasToClone.cloneNode();
+  canvas.width = w;
+  canvas.heigh = h;
 
-  ctx = textCanvas.getContext('2d');
+  ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  return textCanvas;
+  return canvas;
 }
 
 export const clearTextBuffer = () => {
-  ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 /**
