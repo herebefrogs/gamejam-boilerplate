@@ -1,5 +1,5 @@
 import { isKeyDown, anyKeyDown, isKeyUp } from './inputs/keyboard';
-import { isPointerDown, isPointerUp, pointerCanvasPosition, pointerDirection } from './inputs/pointer';
+import { isPointerDown, isPointerUp, pointerCanvasPosition, pointerDirection, pointerPad } from './inputs/pointer';
 import { isMobile } from './mobile';
 import { checkMonetization, isMonetizationEnabled } from './monetization';
 import { share } from './share';
@@ -438,6 +438,28 @@ function render() {
   }
 
   blit();
+  renderPointerPad();
+};
+
+// the floating D-pad overlay. Drawn in page px straight on the visible canvas
+// (pointerPad is page-space; the canvas has no CSS size so 1 page px == 1
+// canvas px). getBoundingClientRect places it exactly, inline-baseline gap
+// and all. A translucent base disc stretched from the anchor out to the
+// finger + a smaller, more opaque knob disc on the finger (so the knob rides
+// the base's edge).
+function renderPointerPad() {
+  if (screen === GAME_SCREEN && isPointerDown()) {
+    const [padX, padY, fingerX, fingerY, RAMP] = pointerPad();
+    const b = c.getBoundingClientRect();
+    const ax = padX - b.left, ay = padY - b.top;
+    const fx = fingerX - b.left, fy = fingerY - b.top;
+    // base: fixed size, radius = the farthest the knob centre (the finger)
+    // can sit from the anchor - RAMP on each axis, so RAMP*sqrt2 diagonally.
+    CTX.fillStyle = 'rgba(255,255,255,.25)';
+    CTX.beginPath(); CTX.arc(ax, ay, RAMP * Math.SQRT2, 0, 2 * Math.PI); CTX.fill();
+    CTX.fillStyle = 'rgba(255,255,255,.5)';    // knob on the finger
+    CTX.beginPath(); CTX.arc(fx, fy, RAMP * 0.4, 0, 2 * Math.PI); CTX.fill();
+  }
 };
 
 function renderCountdown() {

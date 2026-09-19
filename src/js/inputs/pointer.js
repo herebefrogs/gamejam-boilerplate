@@ -5,24 +5,33 @@
  * will install the keyboard event listeners
  */
 
-import { clamp, lerp } from '../utils';
+import { clamp } from '../utils';
 
 /* private */
 
-// screen position of pointer
+// screen position of pointer (pageX/pageY)
 let x = 0;
 let y = 0;
-// vector/direction of pointer motion, in range [-1, 1];
+// steering vector, each axis in [-1, 1]
 let vX = 0;
 let vY = 0;
-// pointer container, used to detect direction reversal for each axis
-let minX = 0;
-let minY = 0;
-let maxX = 0;
-let maxY = 0;
-// minimum distance to cover before pointer direction considered reversed
-// aka click "size" in px
-let MIN_DISTANCE = 30;
+// pad centre / anchor, per axis. Starts at the contact point; trails the
+// finger by RAMP once the finger pushes past the pad edge (see updatePad).
+// This is the "floating D-pad" - the pad follows your thumb rather than
+// staying pinned where you first touched, so a long drift never leaves you
+// off the pad. On reversal the finger has to travel back through this centre
+// before the axis flips sign, which is the D-pad feel players expect.
+let aX = 0;
+let aY = 0;
+// the pad radius, px: an axis ramps linearly 0 -> +/-1 over this distance from
+// the anchor, and the anchor trails the finger to stay within it. One number,
+// both jobs - deflection is proportional edge to edge (no dead outer band).
+// Sized for a thumb: ~a finger-width of slack each way. Was MIN_DISTANCE.
+const RAMP = 55;
+// hold-straight dead radius around the centre, px. Inside it an axis reads
+// exactly 0 - absorbs thumb tremor and, being per-axis, snaps a mostly-
+// vertical or mostly-horizontal drag to pure up/down or left/right.
+const DEAD = 8;
 // click time
 let pointerDownTime = 0;
 // last pointer event (for canvas space calculations)
@@ -38,7 +47,8 @@ addEventListener('pointerdown', e => {
   lastEvent = e;
 
   pointerDownTime = performance.now();
-  [x, y] = [maxX, maxY] = [minX, minY] = pointerLocation();
+  [x, y] = [aX, aY] = pointerLocation();
+  vX = vY = 0;   // don't let the previous drag's heading leak into the frame before the first move
 });
 
 addEventListener('pointermove', e => {
@@ -48,7 +58,7 @@ addEventListener('pointermove', e => {
   [x, y] = pointerLocation();
 
   if (pointerDownTime) {
-    setPointerDirection();
+    updatePad();
   }
 });
 
@@ -57,7 +67,7 @@ addEventListener('pointerup', e => {
   lastEvent = e;
 
   pointerDownTime = 0;
-  vX = vY = minX = minY = maxX = maxY = 0;
+  vX = vY = aX = aY = 0;
 });
 
 // for multiple pointers, use e.pointerId to differentiate (on desktop, mouse is always 1, on mobile every pointer even has a different id incrementing by 1)
@@ -66,50 +76,20 @@ addEventListener('pointerup', e => {
 // { id: e.pointerId, x: e.x, y: e.y, w: e.width*window.devicePixelRatio, h: e.height*window.devicePixelRatio}
 const pointerLocation = () => [Math.floor(lastEvent.pageX), Math.floor(lastEvent.pageY)];
 
-function setPointerDirection() {
-  // touch moving further right
-  if (x > maxX) {
-    maxX = x;
-    vX = lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
-  }
-  // pointer moving further left
-  else if (x < minX) {
-    minX = x;
-    vX = -lerp(0, 1, (maxX - minX) / MIN_DISTANCE)
-  }
-  // pointer reversing left while moving right before
-  else if (x < maxX && vX >= 0) {
-    minX = x;
-    vX = 0;
-  }
-  // pointer reversing right while moving left before
-  else if (minX < x && vX <= 0) {
-    maxX = x;
-    vX = 0;
-  }
+// drag the anchor so the finger is never more than RAMP from it, then read
+// the deflection off (finger - anchor) on each axis independently.
+function updatePad() {
+  aX = clamp(aX, x - RAMP, x + RAMP);
+  aY = clamp(aY, y - RAMP, y + RAMP);
+  vX = deflect(x - aX);
+  vY = deflect(y - aY);
+};
 
-  // pointer moving further down
-  if (y > maxY) {
-    maxY = y;
-    vY = lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
-
-  }
-  // pointer moving further up
-  else if (y < minY) {
-    minY = y;
-    vY = -lerp(0, 1, (maxY - minY) / MIN_DISTANCE)
-
-  }
-  // pointer reversing up while moving down before
-  else if (y < maxY && vY >= 0) {
-    minY = y;
-    vY = 0;
-  }
-  // pointer reversing down while moving up before
-  else if (minY < y && vY <= 0) {
-    maxY = y;
-    vY = 0;
-  }
+// one axis: 0 within DEAD of centre, ramps to +/-1 by RAMP (the anchor trail
+// keeps the finger within RAMP, so the clamp only bites on a fast flick).
+function deflect(d) {
+  const m = Math.abs(d);
+  return m <= DEAD ? 0 : Math.sign(d) * clamp((m - DEAD) / (RAMP - DEAD), 0, 1);
 };
 
 
@@ -138,6 +118,11 @@ export const pointerCanvasPosition = (canvasWidth, canvasHeight) => {
 }
 
 export const pointerDirection = () => [vX, vY];
+
+// pad state for the on-screen D-pad overlay (drawn in game.js - inputs/ must
+// not render). [anchor x, anchor y, finger x, finger y, RAMP, DEAD], positions
+// in pageX/pageY px, the two radii as defined above.
+export const pointerPad = () => [aX, aY, x, y, RAMP, DEAD];
 
 // TODO verify and delete
 /*

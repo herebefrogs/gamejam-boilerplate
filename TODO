@@ -12,8 +12,6 @@ game engine
 - improved inputs
   - keyboard: double key press
   - pointer: double click
-    - classic D-PAD behaviour (need a name for my current implementation)
-    - classic D-PAD rendering (ala Remi overlay circle/range with smaller overlay circle/pad)
   - gamepad
 - lerp-smoothing?
 - tinyfont.js? https://github.com/darkwebdev/tinyfont.js
