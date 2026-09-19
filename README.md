@@ -75,7 +75,7 @@ Special Thanks & Credits
 ------------------------
 - Eoin McGrath for his original build script
 - [Peters](https://twitter.com/p1100i) and [flo-](https://twitter.com/fl0ptimus_prime) for their pixel font from Glitch Hunter
-- [Ryan Malm](https://twitter.com/ryanmalm) for sharing his Twitter message code
+- [Ryan Malm](https://twitter.com/ryanmalm) for sharing his Twitter message code, and for his 5x5 pixel font from The Chroma Incident
 - [Maxime Euziere](https://twitter.com/MaximeEuziere) for his switch/case approach to handling game screens in update/render/input handlers
 - Florent Cailhol for suggesting Terser in place of UglifyJS
 - [Matt](https://twitter.com/Smflyf) for pointing out the existence of `advzip-bin`
