@@ -509,6 +509,12 @@ onload = async (e) => {
 
 onresize = onrotate = function() {
   // scale canvas to fit screen while maintaining aspect ratio
+  // NOTE: innerWidth/innerHeight are plain CSS px on both sides of this ratio,
+  // so devicePixelRatio never enters it and can't disagree across browsers.
+  // If BUFFER/CAMERA_WIDTH/CAMERA_HEIGHT ever become device-dependent instead
+  // of this fixed resolution, derive them from utils/viewport.js
+  // viewportSize() (physical pixels) rather than raw innerWidth/innerHeight,
+  // which mobile browsers report inconsistently for the same physical screen.
   scaleToFit = Math.min(innerWidth / BUFFER.width, innerHeight / BUFFER.height);
   c.width = BUFFER.width * scaleToFit;
   c.height = BUFFER.height * scaleToFit;
