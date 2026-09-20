@@ -12,7 +12,7 @@ game engine
 - improved inputs
   - keyboard: double key press
   - pointer: double click
-  - gamepad
+  - gamepad: multiple simultaneous controllers
 - lerp-smoothing?
 - tinyfont.js? https://github.com/darkwebdev/tinyfont.js
 - support multiple voices for speech synthesis?

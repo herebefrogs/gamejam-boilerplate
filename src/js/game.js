@@ -1,3 +1,4 @@
+import { gamepadPollData } from './inputs/gamepad';
 import { isKeyDown, anyKeyDown, isKeyUp } from './inputs/keyboard';
 import { isPointerDown, isPointerUp, pointerCanvasPosition, pointerDirection, pointerPad } from './inputs/pointer';
 import { isMobile } from './mobile';
@@ -315,9 +316,14 @@ function processInputs() {
         startGame();
       }
       break;
-    case GAME_SCREEN:
+    case GAME_SCREEN: {
+      const gamepadData = gamepadPollData();
       if (isPointerDown()) {
         [hero.velX, hero.velY] = pointerDirection();
+      } else if (gamepadData) {
+        // once connected, gamepad overrides keyboard inputs
+        hero.velX = gamepadData.leftX;
+        hero.velY = gamepadData.leftY;
       } else {
         hero.moveLeft = isKeyDown(
           'ArrowLeft',
@@ -350,6 +356,7 @@ function processInputs() {
         }
       }
       break;
+    }
     case END_SCREEN:
       if (isKeyUp('KeyT')) {
         // TODO can I share an image of the game?
