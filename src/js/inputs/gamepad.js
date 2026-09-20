@@ -16,26 +16,36 @@
 // navigator.getGamepads(), polled every frame, is the only thing that works
 // consistently across all three engines - so that's all this module does.
 
-// specific to Xbox Controller (official Microsoft and 3rd party licensed AfterGlow)
-const LEFT_ANALOG_X_AXIS = 0;
-const LEFT_ANALOG_Y_AXIS = 1;
-const BUTTON_A = 0;
-const BUTTON_B = 1;
-const BUTTON_X = 2;
-const BUTTON_Y = 3;
-
 // only the first connected gamepad is used
 // no support yet for multiple simultaneous gamepads.
 function gamepadPollData() {
   for (const gamepad of navigator.getGamepads()) {
     if (gamepad && gamepad.connected) {
+      // "standard" gamepad mapping (gamepad.mapping === 'standard'), as
+      // reported by an Xbox Controller (official Microsoft and 3rd party
+      // licensed AfterGlow). Triggers (buttons 6/7) are analog, [0, 1]
+      // range, not discrete.
       return {
-        leftX: Math.round(gamepad.axes[LEFT_ANALOG_X_AXIS] * 100) / 100,
-        leftY: Math.round(gamepad.axes[LEFT_ANALOG_Y_AXIS] * 100) / 100,
-        buttonA: gamepad.buttons[BUTTON_A].pressed,
-        buttonB: gamepad.buttons[BUTTON_B].pressed,
-        buttonX: gamepad.buttons[BUTTON_X].pressed,
-        buttonY: gamepad.buttons[BUTTON_Y].pressed
+        leftX: Math.round(gamepad.axes[0] * 100) / 100,
+        leftY: Math.round(gamepad.axes[1] * 100) / 100,
+        rightX: Math.round(gamepad.axes[2] * 100) / 100,
+        rightY: Math.round(gamepad.axes[3] * 100) / 100,
+        buttonA: gamepad.buttons[0].pressed,
+        buttonB: gamepad.buttons[1].pressed,
+        buttonX: gamepad.buttons[2].pressed,
+        buttonY: gamepad.buttons[3].pressed,
+        leftBumper: gamepad.buttons[4].pressed,
+        rightBumper: gamepad.buttons[5].pressed,
+        leftTrigger: Math.round(gamepad.buttons[6].value * 100) / 100,
+        rightTrigger: Math.round(gamepad.buttons[7].value * 100) / 100,
+        back: gamepad.buttons[8].pressed,
+        start: gamepad.buttons[9].pressed,
+        leftStickButton: gamepad.buttons[10].pressed,
+        rightStickButton: gamepad.buttons[11].pressed,
+        dpadUp: gamepad.buttons[12].pressed,
+        dpadDown: gamepad.buttons[13].pressed,
+        dpadLeft: gamepad.buttons[14].pressed,
+        dpadRight: gamepad.buttons[15].pressed
       };
     }
   }
